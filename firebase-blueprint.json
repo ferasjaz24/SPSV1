@@ -1,0 +1,348 @@
+{
+  "entities": {
+    "employee": {
+      "title": "Employee",
+      "description": "Represents an employee profile in the factory",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "arabicName": { "type": "string" },
+        "englishName": { "type": "string" },
+        "iqamaId": { "type": "string" },
+        "passportDetails": { "type": "string" },
+        "jobTitle": { "type": "string" },
+        "grade": { "type": "string" },
+        "basicSalary": { "type": "number" },
+        "mobile": { "type": "string" },
+        "nationality": { "type": "string" },
+        "department": { "type": "string" },
+        "classification": { "type": "string" },
+        "dateOfJoining": { "type": "string" },
+        "contractExpiry": { "type": "string" }
+      },
+      "required": ["id", "arabicName", "englishName"]
+    },
+    "client": {
+      "title": "Client",
+      "description": "Represents a customer or client account in the CRM",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "clientName": { "type": "string" },
+        "companyName": { "type": "string" },
+        "mobile": { "type": "string" },
+        "email": { "type": "string" },
+        "city": { "type": "string" },
+        "crNumber": { "type": "string" },
+        "taxNumber": { "type": "string" },
+        "classification": { "type": "string" },
+        "dateCreated": { "type": "string" }
+      },
+      "required": ["id", "clientName", "mobile"]
+    },
+    "daily_installation": {
+      "title": "Daily Installation",
+      "description": "Logs daily site installation trips, services, crew members, and progress photos",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" },
+        "projectName": { "type": "string" },
+        "quoteNumber": { "type": "string" },
+        "serviceAndLocation": { "type": "string" },
+        "location": { "type": "string" },
+        "crew": { "type": "array" },
+        "photoUrl": { "type": "string" },
+        "photoName": { "type": "string" },
+        "date": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "type", "date"]
+    },
+    "user": {
+      "title": "User",
+      "description": "Represents an ERP user with custom roles and permissions",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "username": { "type": "string" },
+        "role": { "type": "string" },
+        "permissions": { "type": "object" },
+        "email": { "type": "string" }
+      },
+      "required": ["uid", "username", "role"]
+    },
+    "journal_entry": {
+      "title": "Journal Entry",
+      "description": "Double-entry bookkeeping journal record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "reference": { "type": "string" },
+        "description": { "type": "string" },
+        "lines": { "type": "array" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "date", "status"]
+    },
+    "bank_account": {
+      "title": "Bank Account",
+      "description": "Corporate bank account configuration",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "accountName": { "type": "string" },
+        "bankName": { "type": "string" },
+        "accountNumber": { "type": "string" },
+        "iban": { "type": "string" },
+        "balance": { "type": "number" }
+      },
+      "required": ["id", "accountName", "iban"]
+    },
+    "cash_box": {
+      "title": "Cash Box",
+      "description": "Physical corporate cash box configuration",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "boxName": { "type": "string" },
+        "responsibleUser": { "type": "string" },
+        "balance": { "type": "number" }
+      },
+      "required": ["id", "boxName"]
+    },
+    "cash_bank_transaction": {
+      "title": "Cash Bank Transaction",
+      "description": "Transaction logs for money flowing into/out of cash boxes and bank accounts",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "type": { "type": "string" },
+        "source": { "type": "string" },
+        "target": { "type": "string" },
+        "amount": { "type": "number" },
+        "description": { "type": "string" }
+      },
+      "required": ["id", "date", "type", "amount"]
+    },
+    "customer_invoice": {
+      "title": "Customer Invoice",
+      "description": "Tax and sales invoices sent to customers",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "invoiceNumber": { "type": "string" },
+        "clientName": { "type": "string" },
+        "date": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "invoiceNumber", "clientName", "status"]
+    },
+    "supplier_invoice": {
+      "title": "Supplier Invoice",
+      "description": "Procurement invoices received from suppliers",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "invoiceNumber": { "type": "string" },
+        "supplierName": { "type": "string" },
+        "date": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "invoiceNumber", "supplierName", "status"]
+    },
+    "revenue": {
+      "title": "Revenue",
+      "description": "Incoming payments logs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "category": { "type": "string" },
+        "amount": { "type": "number" },
+        "receivedFrom": { "type": "string" }
+      },
+      "required": ["id", "date", "amount"]
+    },
+    "expense": {
+      "title": "Expense",
+      "description": "Outgoing payments logs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "category": { "type": "string" },
+        "amount": { "type": "number" },
+        "paidTo": { "type": "string" }
+      },
+      "required": ["id", "date", "amount"]
+    },
+    "sales_quotation": {
+      "title": "Sales Quotation",
+      "description": "Customer quote estimations",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "quoteNumber": { "type": "string" },
+        "clientName": { "type": "string" },
+        "date": { "type": "string" },
+        "total": { "type": "number" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "quoteNumber", "clientName"]
+    },
+    "payroll_run": {
+      "title": "Payroll Run",
+      "description": "Monthly employee payroll details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "month": { "type": "string" },
+        "totalAmount": { "type": "number" },
+        "status": { "type": "string" },
+        "items": { "type": "array" }
+      },
+      "required": ["id", "month", "status"]
+    },
+    "firas_saved_chat": {
+      "title": "Firas Saved Chat",
+      "description": "User chats saved with the Firas AI Assistant",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "messages": { "type": "array" }
+      },
+      "required": ["id", "userId"]
+    },
+    "clearance": {
+      "title": "Clearance",
+      "description": "Worker job separation or leaves clearances",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "employeeId": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "employeeId", "status"]
+    },
+    "eos_leave_calculation": {
+      "title": "Eos Leave Calculation",
+      "description": "Calculations for end-of-service and leave balances",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "employeeId": { "type": "string" },
+        "amount": { "type": "number" }
+      },
+      "required": ["id", "employeeId"]
+    },
+    "tax_vat_declaration": {
+      "title": "Tax VAT Declaration",
+      "description": "Zakat and VAT corporate declarations",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "period": { "type": "string" },
+        "amount": { "type": "number" }
+      },
+      "required": ["id", "period"]
+    },
+    "zakat_payment": {
+      "title": "Zakat Payment",
+      "description": "Zakat payment transactions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "amount": { "type": "number" }
+      },
+      "required": ["id", "amount"]
+    }
+  },
+  "firestore": {
+    "employees/{id}": {
+      "schema": "employee",
+      "description": "Stores worker profiles, salaries, contacts, and legal documentation"
+    },
+    "clients/{id}": {
+      "schema": "client",
+      "description": "Stores client details, corporate classifications, CR numbers, and CRM fields"
+    },
+    "daily_installations/{id}": {
+      "schema": "daily_installation",
+      "description": "Logs daily installation trips, crew details, locations, and progress photos"
+    },
+    "users/{id}": {
+      "schema": "user",
+      "description": "Stores core identity profile roles and advanced granular permissions"
+    },
+    "journal_entries/{id}": {
+      "schema": "journal_entry",
+      "description": "Maintains corporate financial ledgers and transaction pairs"
+    },
+    "bank_accounts/{id}": {
+      "schema": "bank_account",
+      "description": "Configuration details and running balance tracker for bank accounts"
+    },
+    "cash_boxes/{id}": {
+      "schema": "cash_box",
+      "description": "Physical ledger definitions for corporate cash reserves and responsibility allocation"
+    },
+    "cash_bank_transactions/{id}": {
+      "schema": "cash_bank_transaction",
+      "description": "Audit trails of incoming and outgoing monetary events"
+    },
+    "customer_invoices/{id}": {
+      "schema": "customer_invoice",
+      "description": "Generated sales VAT tax invoices"
+    },
+    "supplier_invoices/{id}": {
+      "schema": "supplier_invoice",
+      "description": "Received supplier bills and purchase invoices"
+    },
+    "revenues/{id}": {
+      "schema": "revenue",
+      "description": "General ledger receipt tracking"
+    },
+    "expenses/{id}": {
+      "schema": "expense",
+      "description": "General ledger cost tracking"
+    },
+    "sales_quotations/{id}": {
+      "schema": "sales_quotation",
+      "description": "CRM pipeline quotes and customer estimations"
+    },
+    "payroll_runs/{id}": {
+      "schema": "payroll_run",
+      "description": "Tracks salary disbursements and regulatory records monthly"
+    },
+    "firas_saved_chats/{id}": {
+      "schema": "firas_saved_chat",
+      "description": "Conversational context logs saved with the AI Assistant"
+    },
+    "clearances/{id}": {
+      "schema": "clearance",
+      "description": "Tracks employee clearances and separation items"
+    },
+    "eos_leave_calculations/{id}": {
+      "schema": "eos_leave_calculation",
+      "description": "Retains legal calculations for employee severances"
+    },
+    "tax_vat_declarations/{id}": {
+      "schema": "tax_vat_declaration",
+      "description": "Stores historic regulatory VAT declarations"
+    },
+    "zakat_payments/{id}": {
+      "schema": "zakat_payment",
+      "description": "Tracks official corporate Zakat contributions"
+    }
+  }
+}

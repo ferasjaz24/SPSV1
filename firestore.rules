@@ -1,0 +1,194 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global default-deny catch-all safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Common helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.email == 'meliodass715@gmail.com');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'meliodass715@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidString(val, maxLen) {
+      return val is string && val.size() <= maxLen;
+    }
+
+    // Collection: users
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(userId) && userId == request.auth.uid && (
+        incoming().keys().hasAll(['uid', 'username', 'role']) &&
+        incoming().keys().size() <= 10 &&
+        incoming().role != 'super_admin'
+      );
+      allow update: if isSignedIn() && isValidId(userId) && userId == request.auth.uid && (
+        !incoming().diff(existing()).affectedKeys().hasAny(['role', 'permissions'])
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Collection: employees
+    match /employees/{id} {
+      allow read: if isSignedIn();
+      allow create: if isEmailVerified() && isValidId(id) && (
+        incoming().keys().hasAll(['arabicName', 'englishName']) &&
+        isValidString(incoming().arabicName, 256) &&
+        isValidString(incoming().englishName, 256)
+      );
+      allow update: if isEmailVerified() && isValidId(id) && (
+        isValidString(incoming().arabicName, 256) &&
+        isValidString(incoming().englishName, 256)
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Collection: clearances
+    match /clearances/{id} {
+      allow read: if isSignedIn();
+      allow write: if isEmailVerified() && isValidId(id);
+    }
+
+    // Collection: journal_entries
+    match /journal_entries/{id} {
+      allow read: if isSignedIn();
+      allow write: if isEmailVerified() && isValidId(id);
+    }
+
+    // Collection: bank_accounts
+    match /bank_accounts/{id} {
+      allow read: if isSignedIn();
+      allow write: if isEmailVerified() && isValidId(id);
+    }
+
+    // Collection: cash_boxes
+    match /cash_boxes/{id} {
+      allow read: if isSignedIn();
+      allow write: if isEmailVerified() && isValidId(id);
+    }
+
+    // Collection: clients
+    match /clients/{id} {
+      allow read: if isSignedIn();
+      allow create: if isEmailVerified() && isValidId(id) && (
+        incoming().keys().hasAll(['clientName', 'mobile']) &&
+        isValidString(incoming().clientName, 256) &&
+        isValidString(incoming().mobile, 32)
+      );
+      allow update: if isEmailVerified() && isValidId(id) && (
+        isValidString(incoming().clientName, 256) &&
+        isValidString(incoming().mobile, 32)
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Collection: cash_bank_transactions
+    match /cash_bank_transactions/{id} {
+      allow read: if isSignedIn();
+      allow write: if isEmailVerified() && isValidId(id);
+    }
+
+    // Collection: eos_leave_calculations
+    match /eos_leave_calculations/{id} {
+      allow read: if isSignedIn();
+      allow write: if isEmailVerified() && isValidId(id);
+    }
+
+    // Collection: customer_invoices
+    match /customer_invoices/{id} {
+      allow read: if isSignedIn();
+      allow create: if isEmailVerified() && isValidId(id);
+      allow update: if isEmailVerified() && isValidId(id) && (
+        existing().status != 'closed' && existing().status != 'finalized'
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Collection: supplier_invoices
+    match /supplier_invoices/{id} {
+      allow read: if isSignedIn();
+      allow create: if isEmailVerified() && isValidId(id);
+      allow update: if isEmailVerified() && isValidId(id) && (
+        existing().status != 'closed' && existing().status != 'finalized'
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Collection: revenues
+    match /revenues/{id} {
+      allow read: if isSignedIn();
+      allow write: if isEmailVerified() && isValidId(id);
+    }
+
+    // Collection: expenses
+    match /expenses/{id} {
+      allow read: if isSignedIn();
+      allow write: if isEmailVerified() && isValidId(id);
+    }
+
+    // Collection: sales_quotations
+    match /sales_quotations/{id} {
+      allow read: if isSignedIn();
+      allow write: if isEmailVerified() && isValidId(id);
+    }
+
+    // Collection: tax_vat_declarations
+    match /tax_vat_declarations/{id} {
+      allow read: if isSignedIn();
+      allow write: if isEmailVerified() && isValidId(id);
+    }
+
+    // Collection: zakat_payments
+    match /zakat_payments/{id} {
+      allow read: if isSignedIn();
+      allow write: if isEmailVerified() && isValidId(id);
+    }
+
+    // Collection: payroll_runs
+    match /payroll_runs/{id} {
+      allow read: if isSignedIn();
+      allow create: if isEmailVerified() && isValidId(id);
+      allow update: if isEmailVerified() && isValidId(id) && (
+        existing().status != 'completed' && existing().status != 'finalized'
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Collection: firas_saved_chats
+    match /firas_saved_chats/{id} {
+      allow read: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isEmailVerified() && isValidId(id) && (incoming() == null || incoming().userId == request.auth.uid || isAdmin());
+    }
+
+    // Collection: daily_installations
+    match /daily_installations/{id} {
+      allow read: if isSignedIn();
+      allow write: if isEmailVerified() && isValidId(id);
+    }
+  }
+}
