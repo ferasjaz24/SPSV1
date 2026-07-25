@@ -15,6 +15,56 @@ interface ProjectPricingStudyProps {
   employees: any[];
 }
 
+// Helper maps for localization of internal values used in forms/AI prompts/PDFs
+const projectTypeMap: Record<string, { ar: string, en: string }> = {
+  "لوحة داخلية": { ar: "لوحة داخلية", en: "Internal Signage" },
+  "لوحة خارجية": { ar: "لوحة خارجية", en: "External Signage" },
+  "حروف بارزة": { ar: "حروف بارزة", en: "Raised Letters" },
+  "حروف مضيئة": { ar: "حروف مضيئة", en: "Illuminated Letters" },
+  "كلادينج واجهة": { ar: "كلادينج واجهة", en: "Facade Cladding" },
+  "ستكرات": { ar: "ستكرات", en: "Stickers" },
+  "طباعة بنر": { ar: "طباعة بنر", en: "Banner Printing" },
+  "طباعة فلكس": { ar: "طباعة فلكس", en: "Flex Printing" },
+};
+
+const difficultyMap: Record<string, { ar: string, en: string }> = {
+  "سهل": { ar: "سهل", en: "Easy" },
+  "متوسط": { ar: "متوسط", en: "Medium" },
+  "صعب": { ar: "صعب", en: "Hard" },
+  "معقد": { ar: "معقد", en: "Complex" },
+};
+
+const priorityMap: Record<string, { ar: string, en: string }> = {
+  "منخفضة": { ar: "منخفضة", en: "Low" },
+  "متوسطة": { ar: "متوسطة", en: "Medium" },
+  "عالية": { ar: "عالية", en: "High" },
+};
+
+const roleTypeMap: Record<string, { ar: string, en: string }> = {
+  "تصميم": { ar: "تصميم", en: "Design" },
+  "إنتاج": { ar: "إنتاج", en: "Production" },
+  "تجميع": { ar: "تجميع", en: "Assembly" },
+  "تركيب": { ar: "تركيب", en: "Installation" },
+  "إدارة مشروع": { ar: "إدارة مشروع", en: "Project Management" },
+};
+
+const paymentNameMap: Record<string, { ar: string, en: string }> = {
+  "دفعة مقدمة": { ar: "دفعة مقدمة", en: "Advance Payment" },
+  "دفعة تسليم": { ar: "دفعة تسليم", en: "Delivery Payment" },
+  "دفعة جديدة": { ar: "دفعة جديدة", en: "New Payment" },
+};
+
+const paymentConditionMap: Record<string, { ar: string, en: string }> = {
+  "عند التعميد وتوقيع العقد": { ar: "عند التعميد وتوقيع العقد", en: "Upon Authorization & Contract Signing" },
+  "بعد التركيب والتسليم النهائي": { ar: "بعد التركيب والتسليم النهائي", en: "After Installation & Final Handover" },
+};
+
+// Helper function to get translated value, with fallback to original if not found in map
+const getTranslatedValue = (value: string, lang: 'ar' | 'en', map: Record<string, { ar: string, en: string }>) => {
+  return map[value]?.[lang] || value;
+};
+
+
 export default function ProjectPricingStudy({ lang, user, employees }: ProjectPricingStudyProps) {
   const isAr = lang === "ar";
 
@@ -28,11 +78,11 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
   const [formData, setFormData] = useState({
     projectName: "",
     quoteNumber: "",
-    projectType: "لوحة داخلية",
+    projectType: "لوحة داخلية", // Internal value, displayed dynamically
     description: "",
     city: "",
-    difficulty: "متوسط",
-    priority: "متوسطة",
+    difficulty: "متوسط", // Internal value, displayed dynamically
+    priority: "متوسطة", // Internal value, displayed dynamically
     needsInstallation: false,
     needsDesign: false,
     isUrgent: false,
@@ -161,7 +211,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
       salary: emp.basicSalary || 0,
       days: diffDays > 0 ? diffDays : 0,
       hoursPerDay: formData.dailyHours || 8,
-      roleType: "إنتاج",
+      roleType: "إنتاج", // Internal value, displayed dynamically
       notes: ""
     }]);
   };
@@ -231,22 +281,22 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
 
     let aiFeedback: string[] = [];
     let expertAdvice: { text: string, type: 'positive' | 'negative' | 'neutral' }[] = [];
-    let status = "مناسب"; // ممتاز, مناسب, منخفض, خطر, مرتفع
+    let status = "مناسب"; // ممتاز, مناسب, منخفض, خطر, مرتفع (these are internal keys, MUST NOT BE TRANSLATED in JS logic)
     let score = 0;
     let ruthlessEvaluation = "";
     
     if (userP < totalCost) {
       status = "خطر";
-      aiFeedback.push("السعر الحالي أقل من التكلفة الإجمالية مما يعني خسارة محققة.");
+      aiFeedback.push(isAr ? "السعر الحالي أقل من التكلفة الإجمالية مما يعني خسارة محققة." : "The current price is less than the total cost, which means a guaranteed loss.");
     } else if (userP < minPrice) {
       status = "منخفض";
-      aiFeedback.push("السعر الحالي يحقق ربحاً لكنه أقل من الحد الأدنى المقبول لهامش الربح.");
+      aiFeedback.push(isAr ? "السعر الحالي يحقق ربحاً لكنه أقل من الحد الأدنى المقبول لهامش الربح." : "The current price generates profit but is below the minimum acceptable profit margin.");
     } else if (userP >= targetPrice * 1.5) {
       status = "مرتفع";
-      aiFeedback.push("السعر مرتفع جداً مقارنة بالتكلفة وقد يقلل من فرصة قبول العميل للعرض.");
+      aiFeedback.push(isAr ? "السعر مرتفع جداً مقارنة بالتكلفة وقد يقلل من فرصة قبول العميل للعرض." : "The price is too high compared to the cost, which may reduce the client's acceptance of the offer.");
     } else if (userP >= targetPrice) {
       status = "ممتاز";
-      aiFeedback.push("السعر ممتاز ويحقق هامش الربح المطلوب وأكثر.");
+      aiFeedback.push(isAr ? "السعر ممتاز ويحقق هامش الربح المطلوب وأكثر." : "The price is excellent and achieves the required profit margin and more.");
     } else {
       status = "مناسب";
     }
@@ -266,17 +316,17 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
     const advanceCash = userP * (advancePaymentPct / 100);
     const initialRequiredCash = matCost + monthlyOpCost + (labCost * Math.min(1, 30 / Math.max(diffDays, 1))); // Materials + 1st month operation & labor
     
-    expertAdvice.push({ text: `نظام الدفعات المقترح كمحترف: يفضل تقسيم الدفعات كالتالي: 50% دفعة مقدمة (لتغطية المواد الأولية والمصروفات لبدء العمل)، 30% بعد إنجاز 50% من العمل أو عند توريد المواد للموقع، و 20% عند التسليم النهائي. هذا يضمن سيولة نقدية مستمرة وعدم تعثر المشروع.`, type: 'neutral' });
+    expertAdvice.push({ text: isAr ? `نظام الدفعات المقترح كمحترف: يفضل تقسيم الدفعات كالتالي: 50% دفعة مقدمة (لتغطية المواد الأولية والمصروفات لبدء العمل)، 30% بعد إنجاز 50% من العمل أو عند توريد المواد للموقع، و 20% عند التسليم النهائي. هذا يضمن سيولة نقدية مستمرة وعدم تعثر المشروع.` : `Proposed payment system as a professional: It is preferable to divide payments as follows: 50% advance payment (to cover raw materials and expenses to start work), 30% after 50% completion or material delivery to the site, and 20% upon final handover. This ensures continuous cash flow and prevents project delays.`, type: 'neutral' });
 
     if (advanceCash < initialRequiredCash && advancePaymentPct > 0) {
-      expertAdvice.push({ text: `الدفعة المقدمة الحالية (${advancePaymentPct}%) لا تغطي التكاليف الأولية (المواد وتكاليف الشهر الأول). كمحترف لأكثر من 45 سنة في السوق، أنصح برفع الدفعة المقدمة إلى ${Math.ceil((initialRequiredCash / userP) * 100)}% على الأقل لضمان عدم تمويل المشروع من سيولة الشركة وتجنب التعثر.`, type: 'negative' });
+      expertAdvice.push({ text: isAr ? `الدفعة المقدمة الحالية (${advancePaymentPct}%) لا تغطي التكاليف الأولية (المواد وتكاليف الشهر الأول). كمحترف لأكثر من 45 سنة في السوق، أنصح برفع الدفعة المقدمة إلى ${Math.ceil((initialRequiredCash / userP) * 100)}% على الأقل لضمان عدم تمويل المشروع من سيولة الشركة وتجنب التعثر.` : `The current advance payment (${advancePaymentPct}%) does not cover initial costs (materials and first-month expenses). As a professional with over 45 years in the market, I advise increasing the advance payment to at least ${Math.ceil((initialRequiredCash / userP) * 100)}% to ensure the project is not funded by company liquidity and to avoid setbacks.`, type: 'negative' });
     } else if (advancePaymentPct < 40) {
-      expertAdvice.push({ text: `كمبدأ أساسي في المقاولات والإعلانات، لا تقبل بدفعة مقدمة أقل من 50% لضمان جدية العميل وتغطية تكاليف المواد الخام بالكامل قبل بدء العمل.`, type: 'negative' });
+      expertAdvice.push({ text: isAr ? `كمبدأ أساسي في المقاولات والإعلانات، لا تقبل بدفعة مقدمة أقل من 50% لضمان جدية العميل وتغطية تكاليف المواد الخام بالكامل قبل بدء العمل.` : `As a fundamental principle in contracting and advertising, do not accept an advance payment of less than 50% to ensure client seriousness and full coverage of raw material costs before starting work.`, type: 'negative' });
     }
 
     const employeeRatio = selectedEmployees.length / Math.max(employees.length, 1);
     if (employeeRatio > 0.5) {
-      expertAdvice.push({ text: `تنبيه هام جداً: تخصيص أكثر من 50% من طاقتك العمالية لمشروع واحد يخلق عنق زجاجة ويضغط بشكل خطير على قسم الإنتاج مما سيعطل تسليم الطلبات للعملاء الآخرين.`, type: 'negative' });
+      expertAdvice.push({ text: isAr ? `تنبيه هام جداً: تخصيص أكثر من 50% من طاقتك العمالية لمشروع واحد يخلق عنق زجاجة ويضغط بشكل خطير على قسم الإنتاج مما سيعطل تسليم الطلبات للعملاء الآخرين.` : `Very important alert: Allocating more than 50% of your workforce to a single project creates a bottleneck and dangerously stresses the production department, which will delay order deliveries to other clients.`, type: 'negative' });
     }
 
     const avgDuration = activeOrders.length > 0 ? activeOrders.reduce((sum: number, o: any) => {
@@ -287,48 +337,51 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
     }, 0) / activeOrders.length : 0;
 
     if (currentActiveProjectsCount > 10 && selectedEmployees.length > 5) {
-       expertAdvice.push({ text: `المصنع حالياً مشغول بـ ${currentActiveProjectsCount} مشاريع قائمة (بمتوسط مدة ${Math.ceil(avgDuration)} يوم). سحب ${selectedEmployees.length} عمال سيؤثر على سير العمل. دراسة الموقف تشير لضرورة تمديد المدة أو استئجار عمالة إضافية مؤقتة.`, type: 'negative' });
+       expertAdvice.push({ text: isAr ? `المصنع حالياً مشغول بـ ${currentActiveProjectsCount} مشاريع قائمة (بمتوسط مدة ${Math.ceil(avgDuration)} يوم). سحب ${selectedEmployees.length} عمال سيؤثر على سير العمل. دراسة الموقف تشير لضرورة تمديد المدة أو استئجار عمالة إضافية مؤقتة.` : `The factory is currently occupied with ${currentActiveProjectsCount} ongoing projects (with an average duration of ${Math.ceil(avgDuration)} days). Pulling ${selectedEmployees.length} workers will affect workflow. The situation study indicates the necessity of extending the duration or hiring additional temporary labor.`, type: 'negative' });
     } else if (currentActiveProjectsCount > 0) {
-       expertAdvice.push({ text: `يوجد حالياً ${currentActiveProjectsCount} مشاريع قائمة (بمتوسط مدة ${Math.ceil(avgDuration)} يوم). هذا المشروع يتطلب ${selectedEmployees.length} موظف لمدة ${diffDays} يوم. التقييم الاحترافي يرى أن المصنع قادر على الاستيعاب إذا تم التنسيق الجيد.`, type: 'neutral' });
+       expertAdvice.push({ text: isAr ? `يوجد حالياً ${currentActiveProjectsCount} مشاريع قائمة (بمتوسط مدة ${Math.ceil(avgDuration)} يوم). هذا المشروع يتطلب ${selectedEmployees.length} موظف لمدة ${diffDays} يوم. التقييم الاحترافي يرى أن المصنع قادر على الاستيعاب إذا تم التنسيق الجيد.` : `There are currently ${currentActiveProjectsCount} ongoing projects (with an average duration of ${Math.ceil(avgDuration)} days). This project requires ${selectedEmployees.length} employees for ${diffDays} days. Professional assessment indicates the factory can accommodate if good coordination is maintained.`, type: 'neutral' });
     } else {
-       expertAdvice.push({ text: `المصنع متفرغ حالياً (لا توجد مشاريع قائمة كبيرة) مما يسهل إنجاز المشروع وتسريع وتيرة العمل. فرصة ممتازة للتركيز على الجودة وتقليل التكلفة التشغيلية.`, type: 'positive' });
+       expertAdvice.push({ text: isAr ? `المصنع متفرغ حالياً (لا توجد مشاريع قائمة كبيرة) مما يسهل إنجاز المشروع وتسريع وتيرة العمل. فرصة ممتازة للتركيز على الجودة وتقليل التكلفة التشغيلية.` : `The factory is currently free (no major ongoing projects), which facilitates project completion and speeds up work. An excellent opportunity to focus on quality and reduce operational costs.`, type: 'positive' });
     }
 
     if (diffDays > 0 && selectedEmployees.length > 0) {
       const avgSalary = selectedEmployees.reduce((sum, e) => sum + (e.salary || 0), 0) / selectedEmployees.length;
-      expertAdvice.push({ text: `متوسط رواتب العمالة المخصصة (${avgSalary.toFixed(0)} <SaudiRiyal />). نسبة تكلفة الرواتب من إجمالي التكلفة تبلغ ${((labCost / totalCost) * 100).toFixed(1)}%. إذا تجاوزت هذه النسبة 35% يجب مراجعة تسعير العمالة أو إعادة هندسة المهام.`, type: labCost / totalCost > 0.35 ? 'negative' : 'positive' });
+      expertAdvice.push({ text: isAr ? `متوسط رواتب العمالة المخصصة (${avgSalary.toFixed(0)} ريال). نسبة تكلفة الرواتب من إجمالي التكلفة تبلغ ${((labCost / totalCost) * 100).toFixed(1)}%. إذا تجاوزت هذه النسبة 35% يجب مراجعة تسعير العمالة أو إعادة هندسة المهام.` : `Average salaries of allocated labor (${avgSalary.toFixed(0)} SAR). The ratio of salary cost to total cost is ${((labCost / totalCost) * 100).toFixed(1)}%. If this ratio exceeds 35%, labor pricing or task re-engineering should be reviewed.`, type: labCost / totalCost > 0.35 ? 'negative' : 'positive' });
     }
 
     if (diffDays < 10 && totalCost > 50000) {
-      expertAdvice.push({ text: `مدة المشروع قصيرة جداً (${diffDays} أيام) مقارنة بحجم التكلفة (${totalCost.toFixed(0)} <SaudiRiyal />). نسبة الخطأ ترتفع في المشاريع المستعجلة، أنصح بزيادة هامش المخاطرة بـ 10% أو التفاوض على تمديد المدة.`, type: 'negative' });
+      expertAdvice.push({ text: isAr ? `مدة المشروع قصيرة جداً (${diffDays} أيام) مقارنة بحجم التكلفة (${totalCost.toFixed(0)} ريال). نسبة الخطأ ترتفع في المشاريع المستعجلة، أنصح بزيادة هامش المخاطرة بـ 10% أو التفاوض على تمديد المدة.` : `The project duration is very short (${diffDays} days) compared to the cost (${totalCost.toFixed(0)} SAR). The error rate increases in urgent projects, so I advise increasing the risk margin by 10% or negotiating for an extension.`, type: 'negative' });
     }
 
-    expertAdvice.push({ text: `نصيحة ذهبية: احرص على توقيع العميل على جميع التصاميم واختيار المواد والعينات (Mockups) بشكل خطي ورسمي قبل البدء بالتصنيع، لأن تكلفة إعادة العمل (Rework) في هذا المجال تدمر هامش الربح بالكامل.`, type: 'neutral' });
+    expertAdvice.push({ text: isAr ? `نصيحة ذهبية: احرص على توقيع العميل على جميع التصاميم واختيار المواد والعينات (Mockups) بشكل خطي ورسمي قبل البدء بالتصنيع، لأن تكلفة إعادة العمل (Rework) في هذا المجال تدمر هامش الربح بالكامل.` : `Golden advice: Ensure the client signs off on all designs, material selections, and mockups in writing and officially before starting manufacturing, as the cost of rework in this field completely destroys the profit margin.`, type: 'neutral' });
 
     if (labCost > totalCost * 0.4) {
-      aiFeedback.push("تكلفة العمالة تمثل نسبة عالية من إجمالي التكلفة، يرجى مراجعة عدد الموظفين أو مدة المشروع.");
+      aiFeedback.push(isAr ? "تكلفة العمالة تمثل نسبة عالية من إجمالي التكلفة، يرجى مراجعة عدد الموظفين أو مدة المشروع." : "Labor cost represents a high percentage of the total cost; please review the number of employees or project duration.");
     }
     if (matCost > totalCost * 0.6) {
-      aiFeedback.push("تكلفة المواد مرتفعة وتمثل النسبة الأكبر من التكلفة الكلية.");
+      aiFeedback.push(isAr ? "تكلفة المواد مرتفعة وتمثل النسبة الأكبر من التكلفة الكلية." : "Material cost is high and represents the largest portion of the total cost.");
     }
     if (diffDays < selectedEmployees.length * 2 && selectedEmployees.length > 5) {
-      aiFeedback.push("مدة المشروع قد تكون قصيرة مقارنة بعدد الموظفين المختارين (احتمالية ضغط في العمل).");
+      aiFeedback.push(isAr ? "مدة المشروع قد تكون قصيرة مقارنة بعدد الموظفين المختارين (احتمالية ضغط في العمل)." : "Project duration might be short compared to the number of selected employees (potential work pressure).");
     }
 
     score = actualMargin > 20 && actualMargin < 60 && status !== 'خطر' ? 85 : (status === 'خطر' ? 30 : 60);
-    ruthlessEvaluation = "بناءً على المعطيات الأساسية، الهامش جيد ولكن المخاطر قد تظهر في التنفيذ نظراً لعدم توفر تحليل الذكاء الاصطناعي الكامل في هذه اللحظة.";
+    ruthlessEvaluation = isAr ? "بناءً على المعطيات الأساسية، الهامش جيد ولكن المخاطر قد تظهر في التنفيذ نظراً لعدم توفر تحليل الذكاء الاصطناعي الكامل في هذه اللحظة." : "Based on the basic data, the margin is good, but risks may emerge during execution due to the lack of a full AI analysis at this moment.";
 
     // Try to get real AI analysis
     try {
       const prompt = `
-أنت خبير محترف وشرس في تسعير وإدارة مشاريع الدعاية والإعلان والمقاولات بخبرة 45 سنة.
-قم بتقييم هذا المشروع بصرامة وبدون مجاملة (تقييم لا يرحم):
-اسم المشروع: ${formData.projectName}
-التكلفة الإجمالية: ${totalCost} <SaudiRiyal />
-السعر المقدم للعميل: ${userP} <SaudiRiyal />
-هامش الربح الفعلي المتوقع: ${actualMargin.toFixed(1)}%
-المدة المحددة للمشروع: ${diffDays} يوم
-تفصيل التكاليف: مواد (${matCost})، تشغيل شهري (${monthlyOpCost})، عمالة والتزام رواتب (${labCost} <SaudiRiyal /> يتضمن ${selectedEmployees.reduce((sum, emp) => {
+${isAr ? `أنت خبير محترف وشرس في تسعير وإدارة مشاريع الدعاية والإعلان والمقاولات بخبرة 45 سنة.` : `You are a professional and ruthless expert in pricing and managing advertising, signage, and contracting projects with 45 years of experience.`}
+${isAr ? `قم بتقييم هذا المشروع بصرامة وبدون مجاملة (تقييم لا يرحم):` : `Evaluate this project strictly and without complacency (a ruthless evaluation):`}
+${isAr ? `اسم المشروع: ` : `Project Name: `}${formData.projectName}
+${isAr ? `التكلفة الإجمالية: ` : `Total Cost: `}${totalCost} ${isAr ? `ريال` : `SAR`}
+${isAr ? `السعر المقدم للعميل: ` : `Price Offered to Client: `}${userP} ${isAr ? `ريال` : `SAR`}
+${isAr ? `هامش الربح الفعلي المتوقع: ` : `Expected Actual Profit Margin: `}${actualMargin.toFixed(1)}%
+${isAr ? `المدة المحددة للمشروع: ` : `Project Duration: `}${diffDays} ${isAr ? `يوم` : `days`}
+${isAr ? `نوع المشروع: ` : `Project Type: `}${getTranslatedValue(formData.projectType, lang, projectTypeMap)}
+${isAr ? `درجة الصعوبة: ` : `Difficulty: `}${getTranslatedValue(formData.difficulty, lang, difficultyMap)}
+${isAr ? `الأولوية: ` : `Priority: `}${getTranslatedValue(formData.priority, lang, priorityMap)}
+${isAr ? `تفصيل التكاليف: مواد (` : `Cost Breakdown: Materials (`}${matCost}), ${isAr ? `تشغيل شهري (` : `monthly operational (`}${monthlyOpCost}), ${isAr ? `عمالة والتزام رواتب (` : `labor and payroll commitment (`}${labCost} ${isAr ? `ريال يتضمن ` : `SAR including `}${selectedEmployees.reduce((sum, emp) => {
   const dailyRate = (emp.salary || 0) / 30;
   const hourlyRate = dailyRate / 8;
   
@@ -340,24 +393,24 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
     otCost = hourlyRate * 1.5 * overtimeDaily * (emp.days || 0);
   }
   return sum + otCost;
-}, 0).toFixed(0)} ريال كعمل إضافي مقدر)، مخاطر/طوارئ (${riskCost}).
-جدولة الدفعات: ${payments.map(p => `${p.percentage}% ${p.name} (${p.condition})`).join(' | ')}
-العمالة المخصصة: ${selectedEmployees.length} موظف من أصل ${employees.length} في المصنع.
-عدد المشاريع القائمة حالياً في المصنع (الالتزامات الحالية): ${currentActiveProjectsCount}
+}, 0).toFixed(0)} ${isAr ? `ريال كعمل إضافي مقدر)، مخاطر/طوارئ (` : `SAR in estimated overtime), risks/emergencies (`}${riskCost}).
+${isAr ? `جدولة الدفعات: ` : `Payment Schedule: `}${payments.map(p => `${p.percentage}% ${getTranslatedValue(p.name, lang, paymentNameMap)} (${getTranslatedValue(p.condition, lang, paymentConditionMap)})`).join(' | ')}
+${isAr ? `العمالة المخصصة: ` : `Allocated Labor: `}${selectedEmployees.length} ${isAr ? `موظف من أصل ` : `employees out of `}${employees.length} ${isAr ? `في المصنع.` : `in the factory.`}
+${isAr ? `عدد المشاريع القائمة حالياً في المصنع (الالتزامات الحالية): ` : `Number of current ongoing projects in the factory (current commitments): `}${currentActiveProjectsCount}
 
-ملاحظات مسعر المشروع: ${formData.pricingNotes || "لا توجد"}
-ملاحظات على العميل: ${formData.userNotes || "لا توجد"}
-ملاحظات على العمالة: ${selectedEmployees.map(e => e.notes).filter(Boolean).join(' - ') || "لا توجد"}
+${isAr ? `ملاحظات مسعر المشروع: ` : `Project Pricer Notes: `}${formData.pricingNotes || (isAr ? "لا توجد" : "None")}
+${isAr ? `ملاحظات على العميل: ` : `Client Notes: `}${formData.userNotes || (isAr ? "لا توجد" : "None")}
+${isAr ? `ملاحظات على العمالة: ` : `Labor Notes: `}${selectedEmployees.map(e => e.notes).filter(Boolean).join(' - ') || (isAr ? "لا توجد" : "None")}
 
-قم بتحليل شامل للوقت والموظفين والدفعات وهوامش الربح وتأثير ذلك كله مجتمعاً واستخرج المشاكل المخفية في الملاحظات أو في الأرقام، مع حساب ساعات العمل الإضافية المتوقعة ضمن تكلفة العمالة.
-أريد منك الرد بصيغة JSON حصرية تحتوي على:
+${isAr ? `قم بتحليل شامل للوقت والموظفين والدفعات وهوامش الربح وتأثير ذلك كله مجتمعاً واستخرج المشاكل المخفية في الملاحظات أو في الأرقام، مع حساب ساعات العمل الإضافية المتوقعة ضمن تكلفة العمالة.` : `Perform a comprehensive analysis of time, employees, payments, and profit margins, and their combined impact. Extract hidden issues from notes or figures, including calculating estimated overtime hours within labor costs.`}
+${isAr ? `أريد منك الرد بصيغة JSON حصرية تحتوي على:` : `I want you to respond in an exclusive JSON format containing:`}
 {
   "score": 85, 
-  "ruthlessEvaluation": "نص التقييم الصارم...", 
+  "ruthlessEvaluation": "${isAr ? "نص التقييم الصارم..." : "Strict evaluation text..."}", 
   "advices": [
-    { "text": "نص النصيحة", "type": "positive" },
-    { "text": "نص النصيحة", "type": "negative" },
-    { "text": "نص النصيحة", "type": "neutral" }
+    { "text": "${isAr ? "نص النصيحة" : "Advice text"}", "type": "positive" },
+    { "text": "${isAr ? "نص النصيحة" : "Advice text"}", "type": "negative" },
+    { "text": "${isAr ? "نص النصيحة" : "Advice text"}", "type": "neutral" }
   ]
 }
       `;
@@ -390,7 +443,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
       }
     } catch (err) {
       console.error("AI Generation failed, using local fallback evaluation", err);
-      aiFeedback.push("تنبيه: لم يتم تحميل التقييم الشامل من الذكاء الاصطناعي (قد يكون بسبب الضغط على السيرفرات، يرجى المحاولة لاحقاً).");
+      aiFeedback.push(isAr ? "تنبيه: لم يتم تحميل التقييم الشامل من الذكاء الاصطناعي (قد يكون بسبب الضغط على السيرفرات، يرجى المحاولة لاحقاً)." : "Alert: Comprehensive AI evaluation could not be loaded (possibly due to server load, please try again later).");
     }
 
     setStudyResult({
@@ -411,7 +464,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
         errorMargin
       },
       analysis: {
-        status,
+        status, // keep internal Arabic status for logic, translate for display
         score,
         ruthlessEvaluation,
         feedback: aiFeedback,
@@ -426,6 +479,18 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
+    // Map internal status to display text
+    const displayStatus = (statusKey: string) => {
+      switch (statusKey) {
+        case 'ممتاز': return isAr ? 'ممتاز' : 'Excellent';
+        case 'مناسب': return isAr ? 'مناسب' : 'Suitable';
+        case 'منخفض': return isAr ? 'منخفض' : 'Low';
+        case 'خطر': return isAr ? 'خطر' : 'Risk';
+        case 'مرتفع': return isAr ? 'مرتفع' : 'High';
+        default: return statusKey;
+      }
+    };
+
     const html = `
       <html dir="${isAr ? 'rtl' : 'ltr'}">
         <head>
@@ -434,7 +499,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
             @font-face { font-family: 'Gotham Pro'; src: url('/fonts/Gotham-Pro.ttf') format('truetype'); font-weight: normal; font-style: normal; }
             * { font-family: 'EnglishNumbersOnly', 'GE SS Two', 'Gotham Pro', sans-serif !important; }
           </style>
-          <title>دراسة تسعير مشروع - ${formData.projectName}</title>
+          <title>${isAr ? 'دراسة تسعير مشروع - ' : 'Project Pricing Study - '}${formData.projectName}</title>
           <style>
             body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; line-height: 1.6; }
             h1 { color: #4f46e5; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
@@ -451,35 +516,35 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
           </style>
         </head>
         <body>
-          <h1>دراسة تسعير مشروع: ${formData.projectName || 'بدون اسم'}</h1>
+          <h1>${isAr ? 'دراسة تسعير مشروع: ' : 'Project Pricing Study: '}${formData.projectName || (isAr ? 'بدون اسم' : 'Unnamed')}</h1>
           
           <div class="summary-box">
-            <p><strong>الوصف:</strong> ${formData.description || 'لا يوجد'}</p>
-            <p><strong>المدة:</strong> ${diffDays} يوم (من ${formData.startDate} إلى ${formData.endDate})</p>
-            <p><strong>التكلفة الإجمالية:</strong> ${studyResult.costs.total.toFixed(2)} <SaudiRiyal /></p>
-            <p><strong>السعر المقترح للمشروع:</strong> ${studyResult.pricing.userPrice.toFixed(2)} <SaudiRiyal /></p>
-            <p><strong>الربح المتوقع:</strong> ${studyResult.pricing.actualProfit.toFixed(2)} <SaudiRiyal /> (${studyResult.pricing.actualMargin.toFixed(1)}%)</p>
+            <p><strong>${isAr ? 'الوصف:' : 'Description:'}</strong> ${formData.description || (isAr ? 'لا يوجد' : 'None')}</p>
+            <p><strong>${isAr ? 'المدة:' : 'Duration:'}</strong> ${diffDays} ${isAr ? 'يوم' : 'days'} (${isAr ? 'من ' : 'from '}${formData.startDate} ${isAr ? 'إلى ' : 'to '}${formData.endDate})</p>
+            <p><strong>${isAr ? 'التكلفة الإجمالية:' : 'Total Cost:'}</strong> ${studyResult.costs.total.toFixed(2)} ${isAr ? 'ريال' : 'SAR'}</p>
+            <p><strong>${isAr ? 'السعر المقترح للمشروع:' : 'Proposed Project Price:'}</strong> ${studyResult.pricing.userPrice.toFixed(2)} ${isAr ? 'ريال' : 'SAR'}</p>
+            <p><strong>${isAr ? 'الربح المتوقع:' : 'Expected Profit:'}</strong> ${studyResult.pricing.actualProfit.toFixed(2)} ${isAr ? 'ريال' : 'SAR'} (${studyResult.pricing.actualMargin.toFixed(1)}%)</p>
           </div>
 
-          <h2>تفصيل التكاليف</h2>
+          <h2>${isAr ? 'تفصيل التكاليف' : 'Cost Breakdown'}</h2>
           <table>
-            <tr><th>النوع</th><th>المبلغ (<img src="https://www.sama.gov.sa/ar-sa/Currency/Documents/Saudi_Riyal_Symbol-1.png" style="height: 14px; width: auto; display: inline-block; vertical-align: middle; margin: 0 4px;" referrerPolicy="no-referrer" />)</th></tr>
-            <tr><td>تكلفة المواد الخام</td><td>${studyResult.costs.material.toFixed(2)}</td></tr>
-            <tr><td>التكلفة التشغيلية (للشهر ${studyResult.costs.monthlyOperational.toFixed(2)})</td><td>${studyResult.costs.operational.toFixed(2)}</td></tr>
-            <tr><td>تكلفة العمالة</td><td>${studyResult.costs.labor.toFixed(2)}</td></tr>
-            <tr><td>المخاطر والطوارئ</td><td>${studyResult.costs.risk.toFixed(2)}</td></tr>
-            <tr style="font-weight:bold;background:#f3f4f6;"><td>الإجمالي</td><td>${studyResult.costs.total.toFixed(2)}</td></tr>
+            <tr><th>${isAr ? 'النوع' : 'Type'}</th><th>${isAr ? 'المبلغ (ريال)' : 'Amount (SAR)'}</th></tr>
+            <tr><td>${isAr ? 'تكلفة المواد الخام' : 'Raw Material Cost'}</td><td>${studyResult.costs.material.toFixed(2)}</td></tr>
+            <tr><td>${isAr ? `التكلفة التشغيلية (للشهر)` : `Operational Cost (per month)`}</td><td>${studyResult.costs.operational.toFixed(2)}</td></tr>
+            <tr><td>${isAr ? 'تكلفة العمالة' : 'Labor Cost'}</td><td>${studyResult.costs.labor.toFixed(2)}</td></tr>
+            <tr><td>${isAr ? 'المخاطر والطوارئ' : 'Risks & Contingencies'}</td><td>${studyResult.costs.risk.toFixed(2)}</td></tr>
+            <tr style="font-weight:bold;background:#f3f4f6;"><td>${isAr ? 'الإجمالي' : 'Total'}</td><td>${studyResult.costs.total.toFixed(2)}</td></tr>
           </table>
 
-          <h2>نظام الدفعات المقترح</h2>
+          <h2>${isAr ? 'نظام الدفعات المقترح' : 'Proposed Payment Schedule'}</h2>
           <table>
-            <tr><th>الدفعة</th><th>النسبة</th><th>الشرط/الملاحظة</th></tr>
-            ${payments.map(p => `<tr><td>${p.name}</td><td>${p.percentage}%</td><td>${p.condition}</td></tr>`).join('')}
+            <tr><th>${isAr ? 'الدفعة' : 'Payment'}</th><th>${isAr ? 'النسبة' : 'Percentage'}</th><th>${isAr ? 'الشرط/الملاحظة' : 'Condition/Note'}</th></tr>
+            ${payments.map(p => `<tr><td>${getTranslatedValue(p.name, lang, paymentNameMap)}</td><td>${p.percentage}%</td><td>${getTranslatedValue(p.condition, lang, paymentConditionMap)}</td></tr>`).join('')}
           </table>
 
-          <h2>العمالة المخصصة للمشروع</h2>
+          <h2>${isAr ? 'العمالة المخصصة للمشروع' : 'Allocated Project Workforce'}</h2>
           <table>
-            <tr><th>اسم الموظف</th><th>المسمى الوظيفي</th><th>أيام العمل</th><th>تفصيل التكلفة (أساسي + إضافي)</th><th>التكلفة الإجمالية</th></tr>
+            <tr><th>${isAr ? 'اسم الموظف' : 'Employee Name'}</th><th>${isAr ? 'المسمى الوظيفي' : 'Job Title'}</th><th>${isAr ? 'أيام العمل' : 'Working Days'}</th><th>${isAr ? 'تفصيل التكلفة (أساسي + إضافي)' : 'Cost Breakdown (Base + Overtime)'}</th><th>${isAr ? 'التكلفة الإجمالية' : 'Total Cost'}</th></tr>
             ${selectedEmployees.map(emp => {
               const dailyRate = (emp.salary || 0) / 30;
               const hourlyRate = dailyRate / 8;
@@ -490,35 +555,35 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
               let otLabel = "";
               if (formData.needsOvertime) {
                 otCost = hourlyRate * 1.5 * (formData.expectedOvertimeHours || 0);
-                otLabel = `${formData.expectedOvertimeHours} ساعة إجمالية`;
+                otLabel = `${formData.expectedOvertimeHours} ${isAr ? 'ساعة إجمالية' : 'total hours'}`;
               } else {
                 const overtimeDaily = Math.max((emp.hoursPerDay || 8) - 8, 0);
                 otCost = hourlyRate * 1.5 * overtimeDaily * (emp.days || 0);
-                otLabel = `${overtimeDaily} ساعات/يوم`;
+                otLabel = `${overtimeDaily} ${isAr ? 'ساعات/يوم' : 'hours/day'}`;
               }
               
               const cost = baseCost + otCost;
               return `<tr>
                 <td>${emp.name}</td>
                 <td>${emp.jobTitle}</td>
-                <td>${emp.days} (بمعدل ${emp.hoursPerDay} ساعة/يوم)</td>
-                <td>أساسي: ${baseCost.toFixed(2)} | إضافي (${otLabel}): ${otCost.toFixed(2)}</td>
+                <td>${emp.days} (${isAr ? 'بمعدل ' : 'at '}${emp.hoursPerDay} ${isAr ? 'ساعة/يوم' : 'hours/day'})</td>
+                <td>${isAr ? 'أساسي:' : 'Base:'} ${baseCost.toFixed(2)} | ${isAr ? 'إضافي (' : 'Overtime ('}${otLabel}): ${otCost.toFixed(2)}</td>
                 <td><strong>${cost.toFixed(2)}</strong></td>
               </tr>`;
             }).join('')}
           </table>
 
           <div class="advice-box">
-            <h3>التقييم العام: ${studyResult.analysis.score} / 100</h3>
-            <p><strong>تحليل التقييم الصارم:</strong> ${studyResult.analysis.ruthlessEvaluation}</p>
-            <h3 style="margin-top:20px;">رأي الخبير التفصيلي</h3>
+            <h3>${isAr ? 'التقييم العام:' : 'Overall Rating:'} ${displayStatus(studyResult.analysis.status)} - ${studyResult.analysis.score} / 100</h3>
+            <p><strong>${isAr ? 'تحليل التقييم الصارم:' : 'Ruthless Evaluation Analysis:'}</strong> ${studyResult.analysis.ruthlessEvaluation}</p>
+            <h3 style="margin-top:20px;">${isAr ? 'رأي الخبير التفصيلي' : 'Detailed Expert Opinion'}</h3>
             <ul>
-              ${studyResult.analysis.expertAdvice.map((advice: any) => `<li><strong style="color: ${advice.type === 'positive' ? 'green' : advice.type === 'negative' ? 'red' : 'orange'}">[${advice.type}]</strong> ${advice.text}</li>`).join('')}
+              ${studyResult.analysis.expertAdvice.map((advice: any) => `<li><strong style="color: ${advice.type === 'positive' ? 'green' : advice.type === 'negative' ? 'red' : 'orange'}">[${advice.type === 'positive' ? (isAr ? 'إيجابي' : 'Positive') : advice.type === 'negative' ? (isAr ? 'سلبي' : 'Negative') : (isAr ? 'محايد' : 'Neutral')}]</strong> ${advice.text}</li>`).join('')}
             </ul>
           </div>
 
           <div class="footer">
-            تم إنشاء هذه الدراسة تلقائياً بواسطة نظام تسعير المشاريع الذكي. التاريخ: ${new Date().toLocaleDateString('en-US')}
+            ${isAr ? 'تم إنشاء هذه الدراسة تلقائياً بواسطة نظام تسعير المشاريع الذكي. التاريخ: ' : 'This study was automatically generated by the Smart Project Pricing System. Date: '}${new Date().toLocaleDateString(isAr ? 'ar-SA' : 'en-US')}
           </div>
           <script>
             window.onload = () => {
@@ -533,7 +598,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
   };
 
   if (!canView) {
-    return <div className="p-8 text-center text-red-500 font-bold">ليس لديك صلاحية لعرض دراسة التسعير.</div>;
+    return <div className="p-8 text-center text-red-500 font-bold">{isAr ? "ليس لديك صلاحية لعرض دراسة التسعير." : "You do not have permission to view the pricing study."}</div>;
   }
 
   return (
@@ -541,7 +606,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2">
           <BarChart2 className="w-6 h-6 text-indigo-600" />
-          {isAr ? "دراسة تسعير المشاريع" : "Project Pricing Study"}
+          {isAr ? "دراسة تسعير المشاريع" : "Project Costing & Pricing Study"}
         </h2>
         {savedStudies.length > 0 && !studyResult && (
           <button 
@@ -564,7 +629,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
             {savedStudies.map((study) => (
               <div key={study.id} className="p-4 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors" onClick={() => loadStudy(study)}>
                 <div className="font-bold text-slate-800">{study.projectName || (isAr ? "بدون اسم" : "Unnamed")}</div>
-                <div className="text-xs text-slate-500 mt-1">{new Date(study.createdAt).toLocaleDateString(isAr ? 'en-US' : 'en-US')} - {study.createdBy}</div>
+                <div className="text-xs text-slate-500 mt-1">{new Date(study.createdAt).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US')} - {study.createdBy}</div>
                 <div className="text-sm font-bold text-indigo-600 mt-2 flex items-center gap-1">
                   <span>{study.studyResult?.pricing?.userPrice?.toLocaleString(undefined, {maximumFractionDigits:2})}</span>
                   <SaudiRiyal />
@@ -589,33 +654,33 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
                 <input type="text" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value={formData.projectName} onChange={e => setFormData({...formData, projectName: e.target.value})} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "رقم عرض السعر (اختياري)" : "Quote Number"}</label>
+                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "رقم عرض السعر (اختياري)" : "Quote Number (Optional)"}</label>
                 <input type="text" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value={formData.quoteNumber} onChange={e => setFormData({...formData, quoteNumber: e.target.value})} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "نوع المشروع" : "Project Type"}</label>
-                <input type="text" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value={formData.projectType} onChange={e => setFormData({...formData, projectType: e.target.value})} list="project-types" />
+                <input type="text" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value={getTranslatedValue(formData.projectType, lang, projectTypeMap)} onChange={e => setFormData({...formData, projectType: e.target.value})} list="project-types" />
                 <datalist id="project-types">
-                  <option value="لوحة داخلية" />
-                  <option value="لوحة خارجية" />
-                  <option value="حروف بارزة" />
-                  <option value="حروف مضيئة" />
-                  <option value="كلادينج واجهة" />
-                  <option value="ستكرات" />
-                  <option value="طباعة بنر" />
-                  <option value="طباعة فلكس" />
+                  <option value="لوحة داخلية">{isAr ? "لوحة داخلية" : "Internal Signage"}</option>
+                  <option value="لوحة خارجية">{isAr ? "لوحة خارجية" : "External Signage"}</option>
+                  <option value="حروف بارزة">{isAr ? "حروف بارزة" : "Raised Letters"}</option>
+                  <option value="حروف مضيئة">{isAr ? "حروف مضيئة" : "Illuminated Letters"}</option>
+                  <option value="كلادينج واجهة">{isAr ? "كلادينج واجهة" : "Facade Cladding"}</option>
+                  <option value="ستكرات">{isAr ? "ستكرات" : "Stickers"}</option>
+                  <option value="طباعة بنر">{isAr ? "طباعة بنر" : "Banner Printing"}</option>
+                  <option value="طباعة فلكس">{isAr ? "طباعة فلكس" : "Flex Printing"}</option>
                 </datalist>
               </div>
               <div className="lg:col-span-3">
-                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "وصف مختصر" : "Description"}</label>
+                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "وصف مختصر" : "Short Description"}</label>
                 <input type="text" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "المدينة / الموقع" : "City/Location"}</label>
+                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "المدينة / الموقع" : "City / Location"}</label>
                 <input type="text" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "درجة الصعوبة" : "Difficulty"}</label>
+                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "درجة الصعوبة" : "Difficulty Level"}</label>
                 <select className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value={formData.difficulty} onChange={e => setFormData({...formData, difficulty: e.target.value})}>
                   <option value="سهل">{isAr ? "سهل" : "Easy"}</option>
                   <option value="متوسط">{isAr ? "متوسط" : "Medium"}</option>
@@ -643,7 +708,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
               </label>
               <label className="flex items-center gap-2 text-sm font-bold text-slate-700 cursor-pointer">
                 <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600" checked={formData.isUrgent} onChange={e => setFormData({...formData, isUrgent: e.target.checked})} />
-                {isAr ? "مشروع عاجل؟" : "Urgent?"}
+                {isAr ? "مشروع عاجل؟" : "Urgent Project?"}
               </label>
             </div>
           </div>
@@ -664,7 +729,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
                 <input type="date" lang="en" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "مدة التنفيذ (أيام)" : "Total Days"}</label>
+                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "مدة التنفيذ (أيام)" : "Total Duration (Days)"}</label>
                 <div className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-sm font-bold text-slate-600">
                   {diffDays}
                 </div>
@@ -674,7 +739,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
                 <input type="number" lang="en" min="0" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value={formData.actualWorkingDays} onChange={e => setFormData({...formData, actualWorkingDays: Number(e.target.value)})} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "ساعات العمل اليومية" : "Daily Hours"}</label>
+                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "ساعات العمل اليومية" : "Daily Working Hours"}</label>
                 <input type="number" lang="en" min="1" max="24" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value={formData.dailyHours} onChange={e => setFormData({...formData, dailyHours: Number(e.target.value)})} />
               </div>
               <div className="flex items-center pt-6">
@@ -685,7 +750,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
               </div>
               {formData.needsOvertime && (
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "الساعات الإضافية" : "Overtime Hours"}</label>
+                  <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "الساعات الإضافية المتوقعة" : "Expected Overtime Hours"}</label>
                   <input type="number" lang="en" min="0" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value={formData.expectedOvertimeHours} onChange={e => setFormData({...formData, expectedOvertimeHours: Number(e.target.value)})} />
                 </div>
               )}
@@ -696,7 +761,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
             <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2 border-b pb-4">
               <Calculator className="w-5 h-5 text-indigo-500" />
-              {isAr ? "التكاليف المباشرة للمشروع" : "Direct Costs"}
+              {isAr ? "التكاليف المباشرة للمشروع" : "Direct Project Costs"}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
@@ -712,14 +777,14 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
                   <input type="number" lang="en" min="0" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-slate-800" value={formData.monthlyOperationalCost} onChange={e => setFormData({...formData, monthlyOperationalCost: e.target.value})} placeholder="5000" />
                   <span className={`absolute top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 ${isAr ? 'left-3' : 'right-3'}`}>SAR</span>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1">{isAr ? "يتم حساب التكلفة الإجمالية تلقائياً بناءً على مدة المشروع." : "Total calculated automatically based on duration."}</p>
+                <p className="text-[10px] text-slate-400 mt-1">{isAr ? "يتم حساب التكلفة الإجمالية تلقائياً بناءً على مدة المشروع." : "Total calculated automatically based on project duration."}</p>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "تكلفة المخاطر والمصاريف غير المتوقعة" : "Risks & Unexpected Costs"}</label>
+                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "تكلفة المخاطر والمصاريف غير المتوقعة" : "Risks & Unexpected Expenses"}</label>
                 <div className="flex gap-2">
                   <select className="w-24 p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value={formData.riskType} onChange={e => setFormData({...formData, riskType: e.target.value})}>
-                    <option value="fixed">{isAr ? "مبلغ ثابت" : "Fixed"}</option>
-                    <option value="percentage">{isAr ? "نسبة %" : "Percentage"}</option>
+                    <option value="fixed">{isAr ? "مبلغ ثابت" : "Fixed Amount"}</option>
+                    <option value="percentage">{isAr ? "نسبة %" : "Percentage %"}</option>
                   </select>
                   <input type="number" lang="en" min="0" className="flex-1 p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-slate-800" value={formData.riskValue} onChange={e => setFormData({...formData, riskValue: e.target.value})} placeholder={formData.riskType === 'fixed' ? "2000" : "10"} />
                 </div>
@@ -791,13 +856,13 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
                             <input type="number" lang="en" min="1" max="24" className="w-16 p-1.5 rounded-lg border border-slate-200 text-center text-xs" value={emp.hoursPerDay} onChange={e => updateSelectedEmployee(emp.id, 'hoursPerDay', Number(e.target.value))} />
                           </td>
                           <td className="px-4 py-3">
-                            <input type="text" className="w-32 p-1.5 rounded-lg border border-slate-200 text-xs" value={emp.roleType} onChange={e => updateSelectedEmployee(emp.id, 'roleType', e.target.value)} list="role-types" />
+                            <input type="text" className="w-32 p-1.5 rounded-lg border border-slate-200 text-xs" value={getTranslatedValue(emp.roleType, lang, roleTypeMap)} onChange={e => updateSelectedEmployee(emp.id, 'roleType', e.target.value)} list="role-types" />
                             <datalist id="role-types">
-                              <option value="تصميم" />
-                              <option value="إنتاج" />
-                              <option value="تجميع" />
-                              <option value="تركيب" />
-                              <option value="إدارة مشروع" />
+                              <option value="تصميم">{isAr ? "تصميم" : "Design"}</option>
+                              <option value="إنتاج">{isAr ? "إنتاج" : "Production"}</option>
+                              <option value="تجميع">{isAr ? "تجميع" : "Assembly"}</option>
+                              <option value="تركيب">{isAr ? "تركيب" : "Installation"}</option>
+                              <option value="إدارة مشروع">{isAr ? "إدارة مشروع" : "Project Management"}</option>
                             </datalist>
                           </td>
                           {canViewSalaries && (
@@ -835,7 +900,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
               </div>
             ) : (
               <div className="text-center py-6 text-sm font-bold text-slate-400">
-                {isAr ? "لم يتم اختيار موظفين بعد." : "No employees selected."}
+                {isAr ? "لم يتم اختيار موظفين بعد." : "No employees selected yet."}
               </div>
             )}
           </div>
@@ -846,7 +911,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
               <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
                 <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2 border-b pb-4">
                   <BarChart2 className="w-5 h-5 text-indigo-500" />
-                  {isAr ? "هامش الربح المطلوب" : "Target Margin"}
+                  {isAr ? "هامش الربح المطلوب" : "Target Profit Margin"}
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -854,12 +919,12 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
                     <input type="number" lang="en" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-emerald-600" value={formData.targetMargin} onChange={e => setFormData({...formData, targetMargin: Number(e.target.value)})} />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "الحد الأدنى المقبول %" : "Min Margin %"}</label>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "الحد الأدنى المقبول %" : "Minimum Acceptable %"}</label>
                     <input type="number" lang="en" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-amber-600" value={formData.minMargin} onChange={e => setFormData({...formData, minMargin: Number(e.target.value)})} />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "ملاحظات التسعير (اختياري)" : "Pricing Notes"}</label>
+                  <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "ملاحظات التسعير (اختياري)" : "Pricing Notes (Optional)"}</label>
                   <input type="text" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value={formData.pricingNotes} onChange={e => setFormData({...formData, pricingNotes: e.target.value})} />
                 </div>
               </div>
@@ -869,7 +934,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
               <div className="flex justify-between items-center border-b pb-4">
                 <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                   <FileText className="w-5 h-5 text-indigo-500" />
-                  {isAr ? "دفعات المشروع (التحصيل)" : "Payment Terms"}
+                  {isAr ? "دفعات المشروع (التحصيل)" : "Project Payments (Receivables)"}
                 </h3>
                 <button
                   onClick={() => setPayments([...payments, { id: Date.now().toString(), name: "دفعة جديدة", percentage: 0, condition: "" }])}
@@ -884,16 +949,16 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
                 {payments.map((p, i) => (
                   <div key={p.id} className="flex gap-3 items-center">
                     <div className="w-1/4">
-                      <label className="block text-[10px] font-bold text-slate-500 mb-1">{isAr ? "اسم الدفعة" : "Name"}</label>
-                      <input type="text" className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none" value={p.name} onChange={e => setPayments(prev => prev.map(x => x.id === p.id ? {...x, name: e.target.value} : x))} />
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">{isAr ? "اسم الدفعة" : "Payment Name"}</label>
+                      <input type="text" className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none" value={getTranslatedValue(p.name, lang, paymentNameMap)} onChange={e => setPayments(prev => prev.map(x => x.id === p.id ? {...x, name: e.target.value} : x))} />
                     </div>
                     <div className="w-24">
-                      <label className="block text-[10px] font-bold text-slate-500 mb-1">{isAr ? "النسبة %" : "Percentage"}</label>
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">{isAr ? "النسبة %" : "Percentage %"}</label>
                       <input type="number" lang="en" min="0" max="100" className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none" value={p.percentage} onChange={e => setPayments(prev => prev.map(x => x.id === p.id ? {...x, percentage: Number(e.target.value)} : x))} />
                     </div>
                     <div className="flex-1">
-                      <label className="block text-[10px] font-bold text-slate-500 mb-1">{isAr ? "متى تندفع؟ (الشرط)" : "Condition/Milestone"}</label>
-                      <input type="text" className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:ring-2 focus:ring-indigo-500 outline-none" placeholder={isAr ? "مثال: عند توقيع العقد..." : "e.g. Upon signing..."} value={p.condition} onChange={e => setPayments(prev => prev.map(x => x.id === p.id ? {...x, condition: e.target.value} : x))} />
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">{isAr ? "متى تندفع؟ (الشرط)" : "When is it due? (Condition)"}</label>
+                      <input type="text" className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:ring-2 focus:ring-indigo-500 outline-none" placeholder={isAr ? "مثال: عند توقيع العقد..." : "e.g. Upon contract signing..."} value={getTranslatedValue(p.condition, lang, paymentConditionMap)} onChange={e => setPayments(prev => prev.map(x => x.id === p.id ? {...x, condition: e.target.value} : x))} />
                     </div>
                     <div className="pt-5">
                       <button onClick={() => setPayments(prev => prev.filter(x => x.id !== p.id))} className="text-red-400 hover:bg-red-50 p-2 rounded-lg transition-colors">
@@ -922,18 +987,18 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "السعر (بدون ضريبة)" : "Price (No VAT)"}</label>
+                  <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "السعر (بدون ضريبة)" : "Price (Excl. VAT)"}</label>
                   <input type="number" lang="en" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-black text-slate-800" value={formData.userPrice} onChange={e => setFormData({...formData, userPrice: e.target.value})} />
                 </div>
                 <div className="opacity-60 pointer-events-none">
-                  <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "السعر شامل الضريبة" : "Total w/ VAT"}</label>
+                  <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "السعر شامل الضريبة" : "Total (Incl. VAT)"}</label>
                   <div className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-sm font-black text-slate-800">
                     {totalWithVat.toLocaleString('en-US')}
                   </div>
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "ملاحظات وأسباب التسعير" : "Reasoning & Notes"}</label>
+                <label className="block text-xs font-bold text-slate-500 mb-1">{isAr ? "ملاحظات وأسباب التسعير" : "Pricing Reasoning & Notes"}</label>
                 <input type="text" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value={formData.userNotes} onChange={e => setFormData({...formData, userNotes: e.target.value})} />
               </div>
             </div>
@@ -977,7 +1042,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
           }`}>
             <div className="shrink-0 flex flex-col items-center justify-center p-4 bg-white/60 rounded-2xl border border-black/5 min-w-[120px]">
                <span className="text-4xl font-black">{studyResult.analysis.score}</span>
-               <span className="text-xs font-bold uppercase tracking-widest mt-1 opacity-70">Score</span>
+               <span className="text-xs font-bold uppercase tracking-widest mt-1 opacity-70">{isAr ? "النقاط" : "Score"}</span>
             </div>
             <div className="flex-1">
               <h4 className="text-xl font-black mb-3 flex items-center gap-2">
@@ -1010,7 +1075,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
               </div>
               <h4 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2 relative z-10">
                 <Sparkles className="w-6 h-6 text-slate-600" />
-                {isAr ? "رأي خبير (45 سنة في السوق)" : "Expert Advice (45 Years Market Exp)"}
+                {isAr ? "رأي خبير (45 سنة في السوق)" : "Expert Advice (45 Years Market Experience)"}
               </h4>
               <ul className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-4">
                 {studyResult.analysis.expertAdvice.map((advice: any, i: number) => {
@@ -1043,10 +1108,10 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
             <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
               <h4 className="text-sm font-black text-slate-800 border-b pb-3">{isAr ? "ملخص التكلفة" : "Cost Summary"}</h4>
               <div className="space-y-3 text-sm font-bold">
-                <div className="flex justify-between"><span className="text-slate-500">{isAr ? "تكلفة المواد" : "Material"}</span><span className="text-slate-800">{studyResult.costs.material.toLocaleString('en-US')} <SaudiRiyal /></span></div>
-                <div className="flex justify-between"><span className="text-slate-500">{isAr ? "التكاليف التشغيلية" : "Operational"}</span><span className="text-slate-800">{studyResult.costs.operational.toLocaleString('en-US')} <SaudiRiyal /></span></div>
-                {canViewLaborCost && <div className="flex justify-between"><span className="text-slate-500">{isAr ? "تكلفة العمالة" : "Labor"}</span><span className="text-slate-800">{studyResult.costs.labor.toLocaleString(undefined, {maximumFractionDigits:2})} SAR</span></div>}
-                <div className="flex justify-between"><span className="text-slate-500">{isAr ? "المخاطر الإضافية" : "Risks"}</span><span className="text-slate-800">{studyResult.costs.risk.toLocaleString(undefined, {maximumFractionDigits:2})} SAR</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">{isAr ? "تكلفة المواد" : "Material Cost"}</span><span className="text-slate-800">{studyResult.costs.material.toLocaleString('en-US')} <SaudiRiyal /></span></div>
+                <div className="flex justify-between"><span className="text-slate-500">{isAr ? "التكاليف التشغيلية" : "Operational Costs"}</span><span className="text-slate-800">{studyResult.costs.operational.toLocaleString('en-US')} <SaudiRiyal /></span></div>
+                {canViewLaborCost && <div className="flex justify-between"><span className="text-slate-500">{isAr ? "تكلفة العمالة" : "Labor Cost"}</span><span className="text-slate-800">{studyResult.costs.labor.toLocaleString(undefined, {maximumFractionDigits:2})} SAR</span></div>}
+                <div className="flex justify-between"><span className="text-slate-500">{isAr ? "المخاطر الإضافية" : "Additional Risks"}</span><span className="text-slate-800">{studyResult.costs.risk.toLocaleString(undefined, {maximumFractionDigits:2})} SAR</span></div>
                 <div className="flex justify-between border-t pt-2 text-lg font-black text-indigo-600"><span className="text-slate-800">{isAr ? "الإجمالي" : "Total"}</span><span>{studyResult.costs.total.toLocaleString(undefined, {maximumFractionDigits:2})} SAR</span></div>
               </div>
             </div>
@@ -1055,7 +1120,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
             <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
               <h4 className="text-sm font-black text-slate-800 border-b pb-3">{isAr ? "ملخص التسعير" : "Pricing Summary"}</h4>
               <div className="space-y-3 text-sm font-bold">
-                <div className="flex justify-between"><span className="text-slate-500">{isAr ? "السعر الحالي (للمستخدم)" : "User Price"}</span><span className="text-slate-800">{studyResult.pricing.userPrice.toLocaleString('en-US')} <SaudiRiyal /></span></div>
+                <div className="flex justify-between"><span className="text-slate-500">{isAr ? "السعر الحالي (للمستخدم)" : "Current Price (User Input)"}</span><span className="text-slate-800">{studyResult.pricing.userPrice.toLocaleString('en-US')} <SaudiRiyal /></span></div>
                 <div className="flex justify-between"><span className="text-slate-500">{isAr ? "السعر المقترح" : "Suggested Price"}</span><span className="text-slate-800">{studyResult.pricing.targetPrice.toLocaleString(undefined, {maximumFractionDigits:2})} SAR</span></div>
                 <div className="flex justify-between border-t pt-2 mt-2"><span className="text-slate-500">{isAr ? "الفرق" : "Difference"}</span><span className={studyResult.pricing.userPrice < studyResult.pricing.targetPrice ? 'text-red-500 font-black' : 'text-emerald-500 font-black'}>{(studyResult.pricing.userPrice - studyResult.pricing.targetPrice).toLocaleString(undefined, {maximumFractionDigits:2})} SAR</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">{isAr ? "نسبة الخطأ" : "Error Margin"}</span><span className={Math.abs(studyResult.pricing.errorMargin) > 10 ? 'text-red-500 font-black' : 'text-emerald-500 font-black'}>{studyResult.pricing.errorMargin.toFixed(2)}%</span></div>
@@ -1091,7 +1156,7 @@ export default function ProjectPricingStudy({ lang, user, employees }: ProjectPr
             </button>
             <button className="flex items-center gap-2 px-6 py-3 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-900 transition-colors shadow-sm">
               <FileText className="w-5 h-5" />
-              {isAr ? "إنشاء عرض سعر" : "Create Quote"}
+              {isAr ? "إنشاء عرض سعر" : "Create Quotation"}
             </button>
             <button onClick={handleExportPdf} className="flex items-center gap-2 px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-xl font-bold hover:bg-slate-50 transition-colors shadow-sm">
               <FileDown className="w-5 h-5" />

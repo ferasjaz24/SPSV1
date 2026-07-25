@@ -371,7 +371,7 @@ export default function SalesDashboard({
             overdueCount++;
             overdueSum += amt;
 
-            const cName = plan.clientName || "غير معروف";
+            const cName = plan.clientName || (lang === "ar" ? "غير معروف" : "Unknown");
             clientDelays[cName] = (clientDelays[cName] || 0) + amt;
           }
         });
@@ -408,7 +408,7 @@ export default function SalesDashboard({
     // Top client by Quotes value
     const clientQuoteSums: Record<string, number> = {};
     currentQuotes.forEach((q) => {
-      const cName = q.clientName || "غير معروف";
+      const cName = q.clientName || (lang === "ar" ? "غير معروف" : "Unknown");
       clientQuoteSums[cName] =
         (clientQuoteSums[cName] || 0) + calculateQuotationValue(q);
     });
@@ -584,7 +584,7 @@ export default function SalesDashboard({
 
     // First scan current quotations
     currentQuotes.forEach((q) => {
-      const targetName = q.clientName || "عميل غير معروف";
+      const targetName = q.clientName || (lang === "ar" ? "عميل غير معروف" : "Unknown Client");
       if (!clientsData[targetName]) {
         clientsData[targetName] = {
           name: targetName,
@@ -606,7 +606,7 @@ export default function SalesDashboard({
 
     // Connect with payment phases
     collections.forEach((plan) => {
-      const targetName = plan.clientName || "عميل غير معروف";
+      const targetName = plan.clientName || (lang === "ar" ? "عميل غير معروف" : "Unknown Client");
       if (plan.phases && Array.isArray(plan.phases)) {
         plan.phases.forEach((ph: any) => {
           const amt = Number(ph.amount) || 0;
@@ -637,7 +637,7 @@ export default function SalesDashboard({
       (a, b) => b.totalVal - a.totalVal,
     );
     return list.slice(0, 5);
-  }, [currentQuotes, collections]);
+  }, [currentQuotes, collections, lang]);
 
   // ---------------- INDEX 8: ALERTS LOGIC (MAX 5 ALERTS) ----------------
   const salesAlerts = useMemo(() => {
@@ -1033,7 +1033,9 @@ export default function SalesDashboard({
               </span>
               <h3 className="text-2xl font-black text-slate-800">
                 {card1Stats.value.toLocaleString('en-US')}{" "}
-                <span className="text-xs font-bold text-slate-500">ريال</span>
+                <span className="text-xs font-bold text-slate-500">
+                  {lang === "ar" ? "ريال" : "SAR"}
+                </span>
               </h3>
             </div>
             <div className="p-3.5 bg-indigo-50 text-indigo-600 rounded-2xl">
@@ -1072,7 +1074,9 @@ export default function SalesDashboard({
               </span>
               <h3 className="text-2xl font-black text-slate-800">
                 {card2Stats.value.toLocaleString('en-US')}{" "}
-                <span className="text-xs font-bold text-slate-500">ريال</span>
+                <span className="text-xs font-bold text-slate-500">
+                  {lang === "ar" ? "ريال" : "SAR"}
+                </span>
               </h3>
             </div>
             <div className="p-3.5 bg-emerald-50 text-emerald-600 rounded-2xl">
@@ -1103,7 +1107,9 @@ export default function SalesDashboard({
               </span>
               <h3 className="text-2xl font-black text-slate-800">
                 {card3Stats.value.toLocaleString('en-US')}{" "}
-                <span className="text-xs font-bold text-slate-500">ريال</span>
+                <span className="text-xs font-bold text-slate-500">
+                  {lang === "ar" ? "ريال" : "SAR"}
+                </span>
               </h3>
             </div>
             <div className="p-3.5 bg-cyan-50 text-cyan-600 rounded-2xl">
@@ -1135,7 +1141,7 @@ export default function SalesDashboard({
               <h3 className="text-2xl font-black text-emerald-650">
                 {card4Stats.collected.toLocaleString('en-US')}{" "}
                 <span className="text-xs font-bold text-slate-500">
-                  ريال محصل
+                  {lang === "ar" ? "ريال محصل" : "SAR collected"}
                 </span>
               </h3>
             </div>
@@ -1147,7 +1153,7 @@ export default function SalesDashboard({
             <span className="text-rose-600">
               {lang === "ar"
                 ? `المتبقي: ${card4Stats.remaining.toLocaleString('en-US')} ريال`
-                : `Outstanding: ${card4Stats.remaining.toLocaleString('en-US')}`}
+                : `Outstanding: ${card4Stats.remaining.toLocaleString('en-US')} SAR`}
             </span>
             <span className="text-teal-700 bg-teal-50 px-2.5 py-0.5 rounded-lg text-[10px] b-teal-200">
               {lang === "ar" ? "نسبة التحصيل" : "Collection Rate"}{" "}
@@ -1168,7 +1174,7 @@ export default function SalesDashboard({
               <h3 className="text-2xl font-black text-rose-600">
                 {card5Stats.amount.toLocaleString('en-US')}{" "}
                 <span className="text-xs font-bold text-slate-500">
-                  ريال متأخر
+                  {lang === "ar" ? "ريال متأخر" : "SAR overdue"}
                 </span>
               </h3>
             </div>
@@ -1558,10 +1564,12 @@ export default function SalesDashboard({
                         {rep.approvedCount}
                       </td>
                       <td className="p-3.5 text-slate-700">
-                        {rep.approvedVal.toLocaleString('en-US')} ريال
+                        {rep.approvedVal.toLocaleString('en-US')}{" "}
+                        {lang === "ar" ? "ريال" : "SAR"}
                       </td>
                       <td className="p-3.5 text-emerald-600 font-black">
-                        {rep.collected.toLocaleString('en-US')} ريال
+                        {rep.collected.toLocaleString('en-US')}{" "}
+                        {lang === "ar" ? "ريال" : "SAR"}
                       </td>
                     </tr>
                   ))}
@@ -1633,15 +1641,18 @@ export default function SalesDashboard({
                         {c.quotesCount}
                       </td>
                       <td className="p-3.5 text-slate-700">
-                        {c.totalVal.toLocaleString('en-US')} ريال
+                        {c.totalVal.toLocaleString('en-US')}{" "}
+                        {lang === "ar" ? "ريال" : "SAR"}
                       </td>
                       <td className="p-3.5 text-teal-600 font-black">
-                        {c.paid.toLocaleString('en-US')} ريال
+                        {c.paid.toLocaleString('en-US')}{" "}
+                        {lang === "ar" ? "ريال" : "SAR"}
                       </td>
                       <td
                         className={`p-3.5 font-black ${c.remaining > 0 ? "text-rose-600" : "text-slate-400"}`}
                       >
-                        {c.remaining.toLocaleString('en-US')} ريال
+                        {c.remaining.toLocaleString('en-US')}{" "}
+                        {lang === "ar" ? "ريال" : "SAR"}
                       </td>
                     </tr>
                   ))}
@@ -1719,13 +1730,13 @@ export default function SalesDashboard({
                     <td className="p-3.5">
                       <span
                         className={`px-2.5 py-1 rounded-xl text-[10px] bg-slate-50 text-slate-600 border border-slate-100 font-bold ${
-                          log.type.includes("اعتماد")
+                          log.type.includes("اعتماد") || log.type.includes("Approve")
                             ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                            : log.type.includes("دفعة")
+                            : log.type.includes("دفعة") || log.type.includes("Payment") || log.type.includes("Recorded")
                               ? "bg-teal-50 text-teal-700 border-teal-100"
-                              : log.type.includes("إنتاج")
+                              : log.type.includes("إنتاج") || log.type.includes("Production") || log.type.includes("Sent")
                                 ? "bg-indigo-50 text-indigo-700 border-indigo-100"
-                                : log.type.includes("تعديل")
+                                : log.type.includes("تعديل") || log.type.includes("Modify")
                                   ? "bg-purple-50 text-purple-700 border-purple-100"
                                   : ""
                         }`}

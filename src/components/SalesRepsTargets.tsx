@@ -348,7 +348,7 @@ export default function SalesRepsTargets({ lang, user }: Props) {
       const heightPercent = maxDailyApproved > 0 ? ((val / maxDailyApproved) * 100).toFixed(1) : '0';
       return `
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 80px; flex: 1;">
-          <div style="font-size: 7px; color: #4f46e5; margin-bottom: 2px; font-weight: bold; transform: rotate(-45deg); height: 15px;">${val > 0 ? val.toLocaleString('en-US') : ''}</div>
+          <div style="font-size: 7px; color: #4f46e5; margin-bottom: 2px; font-weight: bold; transform: rotate(-45deg); height: 15px;">${val > 0 ? val.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US') : ''}</div>
           <div style="background-color: #6366f1; width: 8px; border-radius: 2px 2px 0 0; height: ${heightPercent}%;"></div>
           <div style="font-size: 6px; color: #64748b; margin-top: 2px;">${d.name}</div>
         </div>
@@ -358,7 +358,7 @@ export default function SalesRepsTargets({ lang, user }: Props) {
     const pWindow = window.open('', '_blank');
     if (pWindow) {
       pWindow.document.write(`
-        <html dir="rtl">
+        <html dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
         <head>
           <style>
             @font-face { font-family: 'EnglishNumbersOnly'; unicode-range: U+0030-0039, U+002E, U+002F, U+002D, U+0025; src: url('/fonts/Gotham-Pro.ttf') format('truetype'), local("Arial"); }
@@ -366,7 +366,7 @@ export default function SalesRepsTargets({ lang, user }: Props) {
             @font-face { font-family: 'Gotham Pro'; src: url('/fonts/Gotham-Pro.ttf') format('truetype'); font-weight: normal; font-style: normal; }
             * { font-family: 'EnglishNumbersOnly', 'GE SS Two', 'Gotham Pro', sans-serif !important; }
           </style>
-          <title>مؤشرات أداء وتشغيل المندوب</title>
+          <title>${lang === 'ar' ? 'مؤشرات أداء وتشغيل المندوب' : 'Sales Rep Performance & Operations Indicators'}</title>
           <script src="https://cdn.tailwindcss.com"></script>
           <style>
               @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
@@ -383,68 +383,68 @@ export default function SalesRepsTargets({ lang, user }: Props) {
           
           ${sharedPrintHeader}
 
-          <h1 class="text-xl font-black mb-3 text-center text-slate-800">تقرير مؤشرات أداء وتشغيل: ${repName} - <span class="text-slate-500 text-base font-bold">عن شهر: ${selectedMonth}</span></h1>
+          <h1 class="text-xl font-black mb-3 text-center text-slate-800">${lang === 'ar' ? 'تقرير مؤشرات أداء وتشغيل' : 'Performance & Operations Indicators Report'}: ${repName} - <span class="text-slate-500 text-base font-bold">${lang === 'ar' ? 'عن شهر:' : 'For Month:'} ${selectedMonth}</span></h1>
           
-          <h2 class="section-title">مؤشرات المبيعات والعمولات</h2>
+          <h2 class="section-title">${lang === 'ar' ? 'مؤشرات المبيعات والعمولات' : 'Sales & Commission Indicators'}</h2>
           <div class="grid grid-cols-4 gap-2 mb-4">
-            <div class="stat-box"><div class="stat-box-label">الهدف المالي</div><div class="stat-box-value">${targetAmount.toLocaleString('en-US')} <SaudiRiyal /></div></div>
-            <div class="stat-box"><div class="stat-box-label">المحصل المعتمد</div><div class="stat-box-value text-indigo-700">${approvedQuotesValue.toLocaleString('en-US')} <SaudiRiyal /></div></div>
-            <div class="stat-box"><div class="stat-box-label">تحقيق الهدف</div><div class="stat-box-value ${targetAchievementRate >= 100 ? 'text-emerald-600' : 'text-blue-600'}">${targetAchievementRate}% مقفل</div></div>
-            <div class="stat-box"><div class="stat-box-label">عمولة إضافية</div><div class="stat-box-value text-orange-600">${commissionValue.toLocaleString('en-US')} <SaudiRiyal /></div></div>
+            <div class="stat-box"><div class="stat-box-label">${lang === 'ar' ? 'الهدف المالي' : 'Financial Target'}</div><div class="stat-box-value">${targetAmount.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')} <SaudiRiyal /></div></div>
+            <div class="stat-box"><div class="stat-box-label">${lang === 'ar' ? 'المحصل المعتمد' : 'Approved Sales Achieved'}</div><div class="stat-box-value text-indigo-700">${approvedQuotesValue.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')} <SaudiRiyal /></div></div>
+            <div class="stat-box"><div class="stat-box-label">${lang === 'ar' ? 'تحقيق الهدف' : 'Target Achievement'}</div><div class="stat-box-value ${targetAchievementRate >= 100 ? 'text-emerald-600' : 'text-blue-600'}">${targetAchievementRate}% ${lang === 'ar' ? 'مُحقق' : 'Achieved'}</div></div>
+            <div class="stat-box"><div class="stat-box-label">${lang === 'ar' ? 'عمولة إضافية' : 'Additional Commission'}</div><div class="stat-box-value text-orange-600">${commissionValue.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')} <SaudiRiyal /></div></div>
           </div>
 
-          <h2 class="section-title">مؤشرات تشغيلية وتقييم العروض</h2>
+          <h2 class="section-title">${lang === 'ar' ? 'مؤشرات تشغيلية وتقييم العروض' : 'Operational Indicators & Quote Evaluation'}</h2>
           <div class="grid grid-cols-5 gap-2 mb-4">
-            <div class="stat-box"><div class="stat-box-label">العروض الصادرة</div><div class="stat-box-value text-indigo-600">${totalQuotesCount}</div></div>
-            <div class="stat-box"><div class="stat-box-label">تم الاعتماد</div><div class="stat-box-value text-emerald-600">${approvedQuotesCount}</div></div>
-            <div class="stat-box"><div class="stat-box-label">قيد التفاوض (مسودة)</div><div class="stat-box-value text-amber-600">${draftQuotesCount}</div></div>
-            <div class="stat-box"><div class="stat-box-label">نسبة التحويل</div><div class="stat-box-value text-slate-800">${conversionRate}%</div></div>
-            <div class="stat-box"><div class="stat-box-label">القيمة التقديرية</div><div class="stat-box-value">${totalQuotesValue.toLocaleString('en-US')}</div></div>
+            <div class="stat-box"><div class="stat-box-label">${lang === 'ar' ? 'العروض الصادرة' : 'Quotes Issued'}</div><div class="stat-box-value text-indigo-600">${totalQuotesCount}</div></div>
+            <div class="stat-box"><div class="stat-box-label">${lang === 'ar' ? 'تم الاعتماد' : 'Approved'}</div><div class="stat-box-value text-emerald-600">${approvedQuotesCount}</div></div>
+            <div class="stat-box"><div class="stat-box-label">${lang === 'ar' ? 'قيد التفاوض (مسودة)' : 'Under Negotiation (Draft)'}</div><div class="stat-box-value text-amber-600">${draftQuotesCount}</div></div>
+            <div class="stat-box"><div class="stat-box-label">${lang === 'ar' ? 'نسبة التحويل' : 'Conversion Rate'}</div><div class="stat-box-value text-slate-800">${conversionRate}%</div></div>
+            <div class="stat-box"><div class="stat-box-label">${lang === 'ar' ? 'القيمة التقديرية' : 'Estimated Value'}</div><div class="stat-box-value">${totalQuotesValue.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}</div></div>
           </div>
           
           <div class="grid grid-cols-2 gap-3 mb-4">
             <div>
-              <h2 class="section-title !text-emerald-700 !border-emerald-100">مؤشرات طبيعة العملاء للمندوب</h2>
+              <h2 class="section-title !text-emerald-700 !border-emerald-100">${lang === 'ar' ? 'مؤشرات طبيعة العملاء للمندوب' : 'Sales Rep Client Profile Indicators'}</h2>
               <div class="grid grid-cols-2 gap-2">
-                <div class="stat-box"><div class="stat-box-label">عروض لعملاء جدد</div><div class="stat-box-value text-emerald-600">${newClientQuotesCount} <span class="text-[10px] font-normal text-slate-500">(${percentageNewClientsQuotes}%)</span></div></div>
-                <div class="stat-box"><div class="stat-box-label">عروض لعملاء قدامى</div><div class="stat-box-value text-blue-600">${oldClientQuotesCount} <span class="text-[10px] font-normal text-slate-500">(${percentageOldClientsQuotes}%)</span></div></div>
+                <div class="stat-box"><div class="stat-box-label">${lang === 'ar' ? 'عروض لعملاء جدد' : 'Quotes for New Clients'}</div><div class="stat-box-value text-emerald-600">${newClientQuotesCount} <span class="text-[10px] font-normal text-slate-500">(${percentageNewClientsQuotes}%)</span></div></div>
+                <div class="stat-box"><div class="stat-box-label">${lang === 'ar' ? 'عروض لعملاء قدامى' : 'Quotes for Existing Clients'}</div><div class="stat-box-value text-blue-600">${oldClientQuotesCount} <span class="text-[10px] font-normal text-slate-500">(${percentageOldClientsQuotes}%)</span></div></div>
               </div>
             </div>
             <div>
-               <h2 class="section-title !text-red-700 !border-red-100">مؤشرات المديونيات وقوة التحصيل</h2>
+               <h2 class="section-title !text-red-700 !border-red-100">${lang === 'ar' ? 'مؤشرات المديونيات وقوة التحصيل' : 'Receivables & Collection Strength Indicators'}</h2>
                <div class="grid grid-cols-2 gap-2">
-                 <div class="stat-box"><div class="stat-box-label">الهدف المطلوب تحصيله</div><div class="stat-box-value text-slate-700">${targetForCollection.toLocaleString('en-US')}</div></div>
-                 <div class="stat-box border-emerald-200 bg-emerald-50"><div class="stat-box-label text-emerald-800">قوة وفاعلية التحصيل</div><div class="stat-box-value font-black text-indigo-700">${collectionStrength}%</div></div>
+                 <div class="stat-box"><div class="stat-box-label">${lang === 'ar' ? 'الهدف المطلوب تحصيله' : 'Collection Target'}</div><div class="stat-box-value text-slate-700">${targetForCollection.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}</div></div>
+                 <div class="stat-box border-emerald-200 bg-emerald-50"><div class="stat-box-label text-emerald-800">${lang === 'ar' ? 'قوة وفاعلية التحصيل' : 'Collection Effectiveness'}</div><div class="stat-box-value font-black text-indigo-700">${collectionStrength}%</div></div>
                </div>
-               <div class="text-center mt-1 font-bold text-[10px] text-red-600">يوجد عدد (${delayedCollectionsCount}) دفعات متأخرة بالجدولة</div>
+               <div class="text-center mt-1 font-bold text-[10px] text-red-600">${lang === 'ar' ? `يوجد عدد (${delayedCollectionsCount}) دفعات متأخرة بالجدولة` : `There are (${delayedCollectionsCount}) delayed payments in the schedule`}</div>
             </div>
           </div>
 
-          <h2 class="section-title">مقارنة الأداء - آخر 3 أشهر</h2>
+          <h2 class="section-title">${lang === 'ar' ? 'مقارنة الأداء - آخر 3 أشهر' : 'Performance Comparison - Last 3 Months'}</h2>
           <table class="w-full text-sm text-right align-middle mb-4" style="border-collapse: collapse; width: 100%; margin-bottom: 20px;">
             <thead>
               <tr style="background-color: #f8fafc; color: #475569; font-weight: bold;">
-                <th style="padding: 8px; border-bottom: 1px solid #e2e8f0;">المؤشر</th>
+                <th style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${lang === 'ar' ? 'المؤشر' : 'Indicator'}</th>
                 <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center;">${prev2MonthStr}</th>
                 <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center;">${prevMonthStr}</th>
-                <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; color: #1e293b;">${selectedMonth} (الحالي)</th>
+                <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; color: #1e293b;">${selectedMonth} (${lang === 'ar' ? 'الحالي' : 'Current'})</th>
               </tr>
             </thead>
             <tbody>
               <tr style="border-bottom: 1px solid #f1f5f9;">
-                <td style="padding: 8px; font-weight: bold; color: #334155;">المبيعات المعتمدة (ر.س)</td>
-                <td style="padding: 8px; text-align: center; color: #64748b;">${prev2Stats.approvedQuotesValue.toLocaleString('en-US')}</td>
-                <td style="padding: 8px; text-align: center; color: #475569;">${prevStats.approvedQuotesValue.toLocaleString('en-US')}</td>
-                <td style="padding: 8px; text-align: center; color: #047857; font-weight: 900; background-color: #ecfdf5;">${currentStats.approvedQuotesValue.toLocaleString('en-US')}</td>
+                <td style="padding: 8px; font-weight: bold; color: #334155;">${lang === 'ar' ? 'المبيعات المعتمدة (ر.س)' : 'Approved Sales (SAR)'}</td>
+                <td style="padding: 8px; text-align: center; color: #64748b;">${prev2Stats.approvedQuotesValue.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}</td>
+                <td style="padding: 8px; text-align: center; color: #475569;">${prevStats.approvedQuotesValue.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}</td>
+                <td style="padding: 8px; text-align: center; color: #047857; font-weight: 900; background-color: #ecfdf5;">${currentStats.approvedQuotesValue.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}</td>
               </tr>
               <tr style="border-bottom: 1px solid #f1f5f9;">
-                <td style="padding: 8px; font-weight: bold; color: #334155;">التحصيلات النقدية (ر.س)</td>
-                <td style="padding: 8px; text-align: center; color: #64748b;">${prev2Stats.collected.toLocaleString('en-US')}</td>
-                <td style="padding: 8px; text-align: center; color: #475569;">${prevStats.collected.toLocaleString('en-US')}</td>
-                <td style="padding: 8px; text-align: center; color: #1d4ed8; font-weight: 900; background-color: #eff6ff;">${currentStats.collected.toLocaleString('en-US')}</td>
+                <td style="padding: 8px; font-weight: bold; color: #334155;">${lang === 'ar' ? 'التحصيلات النقدية (ر.س)' : 'Cash Collections (SAR)'}</td>
+                <td style="padding: 8px; text-align: center; color: #64748b;">${prev2Stats.collected.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}</td>
+                <td style="padding: 8px; text-align: center; color: #475569;">${prevStats.collected.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}</td>
+                <td style="padding: 8px; text-align: center; color: #1d4ed8; font-weight: 900; background-color: #eff6ff;">${currentStats.collected.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}</td>
               </tr>
               <tr>
-                <td style="padding: 8px; font-weight: bold; color: #334155;">عروض الأسعار المعتمدة (عدد)</td>
+                <td style="padding: 8px; font-weight: bold; color: #334155;">${lang === 'ar' ? 'عروض الأسعار المعتمدة (عدد)' : 'Approved Quotations (Count)'}</td>
                 <td style="padding: 8px; text-align: center; color: #64748b;">${prev2Stats.approvedCount}</td>
                 <td style="padding: 8px; text-align: center; color: #475569;">${prevStats.approvedCount}</td>
                 <td style="padding: 8px; text-align: center; color: #4338ca; font-weight: 900; background-color: #eef2ff;">${currentStats.approvedCount}</td>
@@ -452,7 +452,7 @@ export default function SalesRepsTargets({ lang, user }: Props) {
             </tbody>
           </table>
 
-          <h2 class="section-title">مؤشر المبيعات المعتمدة اليومية (خلال الشهر)</h2>
+          <h2 class="section-title">${lang === 'ar' ? 'مؤشر المبيعات المعتمدة اليومية (خلال الشهر)' : 'Daily Approved Sales Index (Current Month)'}</h2>
           <div style="display: flex; align-items: flex-end; justify-content: space-between; height: 100px; padding: 10px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px;">
             ${dailyChartHTML}
           </div>
@@ -479,7 +479,7 @@ export default function SalesRepsTargets({ lang, user }: Props) {
   });
 
   if (loading) {
-    return <div className="p-12 text-center text-slate-500">جاري تحميل البيانات...</div>;
+    return <div className="p-12 text-center text-slate-500">{lang === 'ar' ? 'جاري تحميل البيانات...' : 'Loading data...'}</div>;
   }
 
   return (
@@ -488,34 +488,34 @@ export default function SalesRepsTargets({ lang, user }: Props) {
         <div>
           <h2 className="text-2xl font-extrabold text-slate-800 flex items-center gap-2">
             <Target className="w-7 h-7 text-indigo-600" />
-            المندوبين والأهداف
+            {lang === 'ar' ? 'المندوبين والأهداف' : 'Sales Reps & Targets'}
           </h2>
-          <p className="text-slate-500 mt-1 text-sm">متابعة دقيقة لمؤشرات أداء مناديب المبيعات والأهداف الشهرية</p>
+          <p className="text-slate-500 mt-1 text-sm">{lang === 'ar' ? 'متابعة دقيقة لمؤشرات أداء مناديب المبيعات والأهداف الشهرية' : 'Accurate tracking of sales representatives\' performance indicators and monthly targets'}</p>
         </div>
         <div className="flex gap-3 items-center">
            {selectedRep && (
              <button onClick={handlePrint} className="bg-slate-800 hover:bg-slate-900 text-white px-5 py-2.5 rounded-xl transition flex items-center gap-2 text-sm font-bold shadow-lg shadow-slate-200">
                <Printer className="w-4 h-4" />
-               طباعة التقرير
+               {lang === 'ar' ? 'طباعة التقرير' : 'Print Report'}
              </button>
            )}
            <button onClick={() => setIsAddRepModalOpen(true)} className="bg-[#005596] hover:bg-[#005A96] text-white px-5 py-2.5 rounded-xl transition flex items-center gap-2 text-sm font-bold shadow-lg shadow-indigo-100">
              <PlusCircle className="w-4 h-4" />
-             إضافة مندوب للتصنيف
+             {lang === 'ar' ? 'إضافة مندوب للتصنيف' : 'Add Sales Rep to Category'}
            </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
         <div>
-          <label className="block mb-2 text-slate-700 font-bold">اختيار المندوب</label>
+          <label className="block mb-2 text-slate-700 font-bold">{lang === 'ar' ? 'اختيار المندوب' : 'Select Sales Rep'}</label>
           <div className="relative">
              <select 
                value={selectedRep} 
                onChange={(e) => setSelectedRep(e.target.value)} 
                className="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-100 bg-slate-50"
              >
-               <option value="">-- اختر المندوب من القائمة --</option>
+               <option value="">{lang === 'ar' ? '-- اختر المندوب من القائمة --' : '-- Select Sales Rep from List --'}</option>
                {filteredReps.map((rep, idx) => (
                  <option key={`${rep.username}-${idx}`} value={rep.username}>{getRepDisplayName(rep.username)}</option>
                ))}
@@ -524,12 +524,12 @@ export default function SalesRepsTargets({ lang, user }: Props) {
           </div>
           {selectedRep && (
             <button onClick={() => removeSalesRep(selectedRep)} className="text-red-500 text-xs mt-2 flex items-center gap-1 hover:text-red-600">
-              <Trash2 className="w-3 h-3" /> إزالة المندوب من تصنيف المبيعات
+              <Trash2 className="w-3 h-3" /> {lang === 'ar' ? 'إزالة المندوب من تصنيف المبيعات' : 'Remove Sales Rep from Category'}
             </button>
           )}
         </div>
         <div>
-          <label className="block mb-2 text-slate-700 font-bold">الشهر ميلادي</label>
+          <label className="block mb-2 text-slate-700 font-bold">{lang === 'ar' ? 'الشهر ميلادي' : 'Month (Gregorian)'}</label>
           <input 
             type="month" 
             value={selectedMonth} 
@@ -545,17 +545,17 @@ export default function SalesRepsTargets({ lang, user }: Props) {
             <h3 className="text-lg font-bold text-slate-800 mb-6 border-b pb-4 flex items-center justify-between">
               <span className="flex items-center gap-2">
                  <DollarSign className="w-5 h-5 text-indigo-500" />
-                 إعدادات الهدف الشهري
+                 {lang === 'ar' ? 'إعدادات الهدف الشهري' : 'Monthly Target Settings'}
               </span>
               <div className="flex gap-2">
                  <input 
                    type="number" 
                    value={manualTargetInput}
                    onChange={e => setManualTargetInput(e.target.value)}
-                   placeholder="أدخل مبلغ التارجت..." 
+                   placeholder={lang === 'ar' ? 'أدخل مبلغ التارجت...' : 'Enter target amount...'} 
                    className="border px-3 py-1.5 rounded-lg text-sm w-48 text-left" dir="ltr"
                  />
-                 <button onClick={updateTarget} className="bg-indigo-50 border border-indigo-200 text-indigo-700 px-4 py-1.5 rounded-lg text-sm hover:bg-indigo-100 transition font-bold">حفظ</button>
+                 <button onClick={updateTarget} className="bg-indigo-50 border border-indigo-200 text-indigo-700 px-4 py-1.5 rounded-lg text-sm hover:bg-indigo-100 transition font-bold">{lang === 'ar' ? 'حفظ' : 'Save'}</button>
               </div>
             </h3>
 
@@ -564,23 +564,23 @@ export default function SalesRepsTargets({ lang, user }: Props) {
                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-3 shadow-md border border-slate-100 text-slate-600">
                    <Target className="w-5 h-5" />
                  </div>
-                 <span className="text-slate-500 text-xs font-bold mb-1">الهدف الشهري</span>
-                 <h4 className="text-2xl font-black text-slate-800">{targetAmount.toLocaleString('en-US')} <span className="text-xs font-normal">ر.س</span></h4>
+                 <span className="text-slate-500 text-xs font-bold mb-1">{lang === 'ar' ? 'الهدف الشهري' : 'Monthly Target'}</span>
+                 <h4 className="text-2xl font-black text-slate-800">{targetAmount.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')} <span className="text-xs font-normal">{lang === 'ar' ? 'ر.س' : 'SAR'}</span></h4>
                </div>
 
                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 p-6 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm">
                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-3 shadow-md border border-emerald-100 text-emerald-600">
                    <CheckCircle className="w-5 h-5" />
                  </div>
-                 <span className="text-emerald-700 text-xs font-bold mb-1">المبيعات المعتمدة (المحققة)</span>
-                 <h4 className="text-2xl font-black text-emerald-900">{approvedQuotesValue.toLocaleString('en-US')} <span className="text-xs font-normal">ر.س</span></h4>
+                 <span className="text-emerald-700 text-xs font-bold mb-1">{lang === 'ar' ? 'المبيعات المعتمدة (المحققة)' : 'Approved Sales (Achieved)'}</span>
+                 <h4 className="text-2xl font-black text-emerald-900">{approvedQuotesValue.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')} <span className="text-xs font-normal">{lang === 'ar' ? 'ر.س' : 'SAR'}</span></h4>
                </div>
 
                <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 p-6 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm">
                  <div className="w-16 h-16 rounded-full border-[5px] border-blue-500 text-blue-700 flex items-center justify-center mb-3 font-black text-lg bg-white">
                    {targetAchievementRate}%
                  </div>
-                 <span className="text-blue-700 text-xs font-bold mb-1">نسبة تحقيق الهدف</span>
+                 <span className="text-blue-700 text-xs font-bold mb-1">{lang === 'ar' ? 'نسبة تحقيق الهدف' : 'Target Achievement Rate'}</span>
                  <div className="w-full bg-blue-200 h-1.5 rounded-full overflow-hidden mt-1"><div className="bg-blue-600 h-full" style={{width: `${Math.min(100, targetAchievementRate)}%`}}></div></div>
                </div>
 
@@ -588,9 +588,9 @@ export default function SalesRepsTargets({ lang, user }: Props) {
                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-3 shadow-md border border-orange-100 text-orange-500">
                    <DollarSign className="w-5 h-5" />
                  </div>
-                 <span className="text-orange-700 text-xs font-bold mb-1">العمولة المستحقة (2.5%)</span>
-                 <h4 className="text-2xl font-black text-orange-900">{commissionValue.toLocaleString('en-US')} <span className="text-xs font-normal">ر.س</span></h4>
-                 <p className="text-[9px] text-orange-600 mt-1">تستحق للمبالغ المحققة فوق التارجت فقط</p>
+                 <span className="text-orange-700 text-xs font-bold mb-1">{lang === 'ar' ? 'العمولة المستحقة (2.5%)' : 'Commission Due (2.5%)'}</span>
+                 <h4 className="text-2xl font-black text-orange-900">{commissionValue.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')} <span className="text-xs font-normal">{lang === 'ar' ? 'ر.س' : 'SAR'}</span></h4>
+                 <p className="text-[9px] text-orange-600 mt-1">{lang === 'ar' ? 'تستحق للمبالغ المحققة فوق التارجت فقط' : 'Due for amounts achieved above target only'}</p>
                </div>
             </div>
           </div>
@@ -599,50 +599,50 @@ export default function SalesRepsTargets({ lang, user }: Props) {
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
                <h3 className="text-lg font-bold text-slate-800 border-b pb-4 flex items-center gap-2 mb-2">
                  <Activity className="w-5 h-5 text-indigo-500" />
-                 مؤشرات الحركة التشغيلية للعروض
+                 {lang === 'ar' ? 'مؤشرات الحركة التشغيلية للعروض' : 'Operational Activity Indicators for Quotes'}
                </h3>
                
                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
                  <div>
-                   <p className="text-slate-500 text-xs mb-1">زيارة وعروض لعملاء جدد هذا الشهر</p>
-                   <p className="text-lg font-bold text-slate-800">{newClientQuotesCount} عميل جديد</p>
+                   <p className="text-slate-500 text-xs mb-1">{lang === 'ar' ? 'زيارة وعروض لعملاء جدد هذا الشهر' : 'Visits & Quotes for new clients this month'}</p>
+                   <p className="text-lg font-bold text-slate-800">{newClientQuotesCount} {lang === 'ar' ? 'عميل جديد' : 'new client(s)'}</p>
                  </div>
                  <Users className="w-6 h-6 text-slate-300" />
                </div>
 
                <div className="grid grid-cols-2 gap-3">
                  <div className="p-3 bg-amber-50 rounded-xl border border-amber-100">
-                   <p className="text-amber-700 text-xs mb-1 font-bold">عروض كمسودة (قيد التفاوض)</p>
-                   <p className="text-lg font-black text-amber-800">{draftQuotesCount} عرض</p>
+                   <p className="text-amber-700 text-xs mb-1 font-bold">{lang === 'ar' ? 'عروض كمسودة (قيد التفاوض)' : 'Draft Quotes (Under Negotiation)'}</p>
+                   <p className="text-lg font-black text-amber-800">{draftQuotesCount} {lang === 'ar' ? 'عرض' : 'quote(s)'}</p>
                  </div>
                  <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
-                   <p className="text-emerald-700 text-xs mb-1 font-bold">عروض أسعار معتمدة</p>
-                   <p className="text-lg font-black text-emerald-800">{approvedQuotesCount} عرض</p>
+                   <p className="text-emerald-700 text-xs mb-1 font-bold">{lang === 'ar' ? 'عروض أسعار معتمدة' : 'Approved Quotations'}</p>
+                   <p className="text-lg font-black text-emerald-800">{approvedQuotesCount} {lang === 'ar' ? 'عرض' : 'quote(s)'}</p>
                  </div>
                </div>
 
                <div className="flex items-center justify-between p-3 bg-indigo-50 rounded-xl border border-indigo-100">
                  <div>
-                   <p className="text-indigo-700 text-xs mb-1 font-bold">نسبة تحويل عروض السعر لاعتماد</p>
-                   <p className="text-lg font-black text-indigo-800">{conversionRate}% تحويل ناجح</p>
+                   <p className="text-indigo-700 text-xs mb-1 font-bold">{lang === 'ar' ? 'نسبة تحويل عروض السعر لاعتماد' : 'Quote-to-Approval Conversion Rate'}</p>
+                   <p className="text-lg font-black text-indigo-800">{conversionRate}% {lang === 'ar' ? 'تحويل ناجح' : 'Successful Conversion'}</p>
                  </div>
                  <TrendingUp className="w-6 h-6 text-indigo-300" />
                </div>
 
                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 mt-2">
-                 <p className="text-slate-500 text-xs mb-3 text-center">توزيع المشاريع وفتح فرص حسب حالة العميل</p>
+                 <p className="text-slate-500 text-xs mb-3 text-center">{lang === 'ar' ? 'توزيع المشاريع وفتح فرص حسب حالة العميل' : 'Project Distribution & Opportunity Creation by Client Status'}</p>
                  <div className="flex justify-around items-center">
                    <div className="text-center">
                      <div className="w-14 h-14 rounded-full border-[4px] border-indigo-500 flex items-center justify-center text-slate-800 font-bold mb-2 mx-auto">
                         {percentageNewClientsQuotes}%
                      </div>
-                     <span className="text-xs text-slate-600 font-bold block">عملاء جدد تماماً</span>
+                     <span className="text-xs text-slate-600 font-bold block">{lang === 'ar' ? 'عملاء جدد تماماً' : 'Brand New Clients'}</span>
                    </div>
                    <div className="text-center">
                      <div className="w-14 h-14 rounded-full border-[4px] border-slate-300 flex items-center justify-center text-slate-800 font-bold mb-2 mx-auto">
                         {percentageOldClientsQuotes}%
                      </div>
-                     <span className="text-xs text-slate-600 font-bold block">عملاء قدامى مكررين</span>
+                     <span className="text-xs text-slate-600 font-bold block">{lang === 'ar' ? 'عملاء قدامى مكررين' : 'Returning Existing Clients'}</span>
                    </div>
                  </div>
                </div>
@@ -652,28 +652,28 @@ export default function SalesRepsTargets({ lang, user }: Props) {
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-fit">
                  <h3 className="text-lg font-bold text-slate-800 border-b pb-4 flex items-center gap-2 mb-6">
                    <DollarSign className="w-5 h-5 text-indigo-500" />
-                   مؤشرات التحصيل
+                   {lang === 'ar' ? 'مؤشرات التحصيل' : 'Collection Indicators'}
                  </h3>
                  <div className="flex flex-col items-center">
                    <div className="w-32 h-32 rounded-full border-8 border-emerald-100 relative flex items-center justify-center mb-4 box-border border-b-emerald-500" style={{ transform: `rotate(${(collectionStrength / 100) * 180}deg)`}}>
                      <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ transform: `rotate(-${(collectionStrength / 100) * 180}deg)`}}>
                        <span className="text-3xl font-black text-emerald-600">{collectionStrength}%</span>
-                       <span className="text-[10px] text-emerald-700">قوة التحصيل</span>
+                       <span className="text-[10px] text-emerald-700">{lang === 'ar' ? 'قوة التحصيل' : 'Collection Strength'}</span>
                      </div>
                    </div>
                    
                    <div className="w-full grid grid-cols-2 gap-4 mt-4">
                      <div className="bg-slate-50 p-3 rounded-lg text-center border border-slate-100">
-                        <p className="text-[10px] text-slate-500 mb-1">المبلغ المحصل</p>
-                        <p className="font-bold text-emerald-600">{totalCollectedThisMonth.toLocaleString('en-US')} ر.س</p>
+                        <p className="text-[10px] text-slate-500 mb-1">{lang === 'ar' ? 'المبلغ المحصل' : 'Amount Collected'}</p>
+                        <p className="font-bold text-emerald-600">{totalCollectedThisMonth.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')} {lang === 'ar' ? 'ر.س' : 'SAR'}</p>
                      </div>
                      <div className="bg-slate-50 p-3 rounded-lg text-center border border-slate-100">
-                        <p className="text-[10px] text-slate-500 mb-1">المستحق الدفتري الشامل عليه</p>
-                        <p className="font-bold text-slate-700">{targetForCollection.toLocaleString('en-US')} ر.س</p>
+                        <p className="text-[10px] text-slate-500 mb-1">{lang === 'ar' ? 'المستحق الدفتري الشامل عليه' : 'Total Booked Receivables'}</p>
+                        <p className="font-bold text-slate-700">{targetForCollection.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')} {lang === 'ar' ? 'ر.س' : 'SAR'}</p>
                      </div>
                      <div className="col-span-2 bg-red-50 p-3 rounded-lg flex items-center justify-between border border-red-100">
-                       <span className="text-xs text-red-700 font-bold flex items-center gap-1"><Clock className="w-3 h-3" /> دفعات متأخرة بالتحصيل بالجدولة</span>
-                       <span className="font-bold text-red-700 px-3 py-1 bg-red-100 rounded-full">{delayedCollectionsCount} دفعة متأخرة</span>
+                       <span className="text-xs text-red-700 font-bold flex items-center gap-1"><Clock className="w-3 h-3" /> {lang === 'ar' ? 'دفعات متأخرة بالتحصيل بالجدولة' : 'Delayed Collections in Schedule'}</span>
+                       <span className="font-bold text-red-700 px-3 py-1 bg-red-100 rounded-full">{delayedCollectionsCount} {lang === 'ar' ? 'دفعة متأخرة' : 'Delayed Payment(s)'}</span>
                      </div>
                    </div>
                  </div>
@@ -685,28 +685,28 @@ export default function SalesRepsTargets({ lang, user }: Props) {
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mt-6 relative z-10 overflow-hidden">
                 <h3 className="text-lg font-bold text-slate-800 border-b pb-4 mb-4 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-indigo-500" />
-                  مقارنة الأداء - آخر 3 أشهر
+                  {lang === 'ar' ? 'مقارنة الأداء - آخر 3 أشهر' : 'Performance Comparison - Last 3 Months'}
                 </h3>
                 
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm text-right align-middle">
                     <thead>
                       <tr className="bg-slate-50 text-slate-600 font-bold">
-                        <th className="p-3 border-b rounded-tr-lg">المؤشر</th>
+                        <th className="p-3 border-b rounded-tr-lg">{lang === 'ar' ? 'المؤشر' : 'Indicator'}</th>
                         <th className="p-3 border-b text-center">{prev2MonthStr}</th>
                         <th className="p-3 border-b text-center">{prevMonthStr}</th>
-                        <th className="p-3 border-b text-center">{selectedMonth} (الحالي)</th>
-                        <th className="p-3 border-b text-center rounded-tl-lg w-32">مسار الأداء (Trend)</th>
+                        <th className="p-3 border-b text-center">{selectedMonth} ({lang === 'ar' ? 'الحالي' : 'Current'})</th>
+                        <th className="p-3 border-b text-center rounded-tl-lg w-32">{lang === 'ar' ? 'مسار الأداء (Trend)' : 'Performance Trend'}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       
                       {/* المبيعات المعتمدة */}
                       <tr className="hover:bg-slate-50/50">
-                        <td className="p-3 font-bold text-slate-700">المبيعات المعتمدة (ر.س)</td>
-                        <td className="p-3 text-center text-slate-500 font-mono">{prev2Stats.approvedQuotesValue.toLocaleString('en-US')}</td>
+                        <td className="p-3 font-bold text-slate-700">{lang === 'ar' ? 'المبيعات المعتمدة (ر.س)' : 'Approved Sales (SAR)'}</td>
+                        <td className="p-3 text-center text-slate-500 font-mono">{prev2Stats.approvedQuotesValue.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}</td>
                         <td className="p-3 text-center text-slate-600 font-bold font-mono group">
-                          {prevStats.approvedQuotesValue.toLocaleString('en-US')}
+                          {prevStats.approvedQuotesValue.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}
                           {(() => {
                              const p = prev2Stats.approvedQuotesValue;
                              const c = prevStats.approvedQuotesValue;
@@ -716,7 +716,7 @@ export default function SalesRepsTargets({ lang, user }: Props) {
                           })()}
                         </td>
                         <td className="p-3 text-center text-emerald-700 font-black font-mono bg-emerald-50/30">
-                          {currentStats.approvedQuotesValue.toLocaleString('en-US')}
+                          {currentStats.approvedQuotesValue.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}
                           {(() => {
                              const p = prevStats.approvedQuotesValue;
                              const c = currentStats.approvedQuotesValue;
@@ -729,9 +729,9 @@ export default function SalesRepsTargets({ lang, user }: Props) {
                           <div className="h-10 w-full" dir="ltr">
                             <ResponsiveContainer width="100%" height="100%">
                               <LineChart data={[
-                                { name: 'M1', value: prev2Stats.approvedQuotesValue },
-                                { name: 'M2', value: prevStats.approvedQuotesValue },
-                                { name: 'M3', value: currentStats.approvedQuotesValue }
+                                { name: lang === 'ar' ? 'شهر-1' : 'Month-1', value: prev2Stats.approvedQuotesValue },
+                                { name: lang === 'ar' ? 'شهر-2' : 'Month-2', value: prevStats.approvedQuotesValue },
+                                { name: lang === 'ar' ? 'شهر-3' : 'Month-3', value: currentStats.approvedQuotesValue }
                               ]}>
                                 <Line type="monotone" dataKey="value" stroke={currentStats.approvedQuotesValue >= prevStats.approvedQuotesValue ? "#10b981" : "#ef4444"} strokeWidth={3} dot={{r:3}} isAnimationActive={false} />
                                 <YAxis domain={['dataMin - 1000', 'dataMax + 1000']} hide />
@@ -744,10 +744,10 @@ export default function SalesRepsTargets({ lang, user }: Props) {
 
                       {/* التحصيلات */}
                       <tr className="hover:bg-slate-50/50">
-                        <td className="p-3 font-bold text-slate-700">التحصيلات النقدية (ر.س)</td>
-                        <td className="p-3 text-center text-slate-500 font-mono">{prev2Stats.collected.toLocaleString('en-US')}</td>
+                        <td className="p-3 font-bold text-slate-700">{lang === 'ar' ? 'التحصيلات النقدية (ر.س)' : 'Cash Collections (SAR)'}</td>
+                        <td className="p-3 text-center text-slate-500 font-mono">{prev2Stats.collected.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}</td>
                         <td className="p-3 text-center text-slate-600 font-bold font-mono group">
-                          {prevStats.collected.toLocaleString('en-US')}
+                          {prevStats.collected.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}
                           {(() => {
                              const p = prev2Stats.collected;
                              const c = prevStats.collected;
@@ -757,7 +757,7 @@ export default function SalesRepsTargets({ lang, user }: Props) {
                           })()}
                         </td>
                         <td className="p-3 text-center text-blue-700 font-black font-mono bg-blue-50/30">
-                          {currentStats.collected.toLocaleString('en-US')}
+                          {currentStats.collected.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US')}
                           {(() => {
                              const p = prevStats.collected;
                              const c = currentStats.collected;
@@ -770,9 +770,9 @@ export default function SalesRepsTargets({ lang, user }: Props) {
                           <div className="h-10 w-full" dir="ltr">
                             <ResponsiveContainer width="100%" height="100%">
                               <LineChart data={[
-                                { name: 'M1', value: prev2Stats.collected },
-                                { name: 'M2', value: prevStats.collected },
-                                { name: 'M3', value: currentStats.collected }
+                                { name: lang === 'ar' ? 'شهر-1' : 'Month-1', value: prev2Stats.collected },
+                                { name: lang === 'ar' ? 'شهر-2' : 'Month-2', value: prevStats.collected },
+                                { name: lang === 'ar' ? 'شهر-3' : 'Month-3', value: currentStats.collected }
                               ]}>
                                 <Line type="monotone" dataKey="value" stroke={currentStats.collected >= prevStats.collected ? "#3b82f6" : "#ef4444"} strokeWidth={3} dot={{r:3}} isAnimationActive={false} />
                                 <YAxis domain={['dataMin - 1000', 'dataMax + 1000']} hide />
@@ -785,7 +785,7 @@ export default function SalesRepsTargets({ lang, user }: Props) {
 
                       {/* إجمالي العروض */}
                       <tr className="hover:bg-slate-50/50">
-                        <td className="p-3 font-bold text-slate-700">عروض الأسعار المعتمدة (عدد)</td>
+                        <td className="p-3 font-bold text-slate-700">{lang === 'ar' ? 'عروض الأسعار المعتمدة (عدد)' : 'Approved Quotations (Count)'}</td>
                         <td className="p-3 text-center text-slate-500 font-mono">{prev2Stats.approvedCount}</td>
                         <td className="p-3 text-center text-slate-600 font-bold font-mono group">
                           {prevStats.approvedCount}
@@ -811,9 +811,9 @@ export default function SalesRepsTargets({ lang, user }: Props) {
                           <div className="h-10 w-full" dir="ltr">
                             <ResponsiveContainer width="100%" height="100%">
                               <LineChart data={[
-                                { name: 'M1', value: prev2Stats.approvedCount },
-                                { name: 'M2', value: prevStats.approvedCount },
-                                { name: 'M3', value: currentStats.approvedCount }
+                                { name: lang === 'ar' ? 'شهر-1' : 'Month-1', value: prev2Stats.approvedCount },
+                                { name: lang === 'ar' ? 'شهر-2' : 'Month-2', value: prevStats.approvedCount },
+                                { name: lang === 'ar' ? 'شهر-3' : 'Month-3', value: currentStats.approvedCount }
                               ]}>
                                 <Line type="monotone" dataKey="value" stroke={currentStats.approvedCount >= prevStats.approvedCount ? "#6366f1" : "#ef4444"} strokeWidth={3} dot={{r:3}} isAnimationActive={false} />
                                 <YAxis domain={['dataMin - 1', 'dataMax + 1']} hide />
@@ -832,7 +832,7 @@ export default function SalesRepsTargets({ lang, user }: Props) {
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mt-6 overflow-hidden">
                 <h3 className="text-lg font-bold text-slate-800 border-b pb-4 mb-6 flex items-center gap-2">
                   <Activity className="w-5 h-5 text-indigo-500" />
-                  مؤشر الأداء اليومي خلال ({selectedMonth})
+                  {lang === 'ar' ? 'مؤشر الأداء اليومي خلال (' : 'Daily Performance Index During ('}{selectedMonth})
                 </h3>
                 <div className="h-80 w-full" dir="ltr">
                   <ResponsiveContainer width="100%" height="100%">
@@ -842,9 +842,9 @@ export default function SalesRepsTargets({ lang, user }: Props) {
                       <YAxis tick={{fontSize: 12, fill: '#64748b'}} tickLine={false} axisLine={false} tickFormatter={(value) => value > 0 ? (value / 1000) + 'k' : '0'} />
                       <Tooltip contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'}} />
                       <Legend wrapperStyle={{paddingTop: '20px', fontSize: '12px'}} />
-                      <Line type="monotone" dataKey="المبيعات المعتمدة" stroke="#10b981" strokeWidth={3} dot={{r: 3, fill: '#10b981', strokeWidth: 2, stroke: '#fff'}} activeDot={{r: 6}} />
-                      <Line type="monotone" dataKey="التحصيلات النقدية" stroke="#3b82f6" strokeWidth={3} dot={{r: 3, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff'}} activeDot={{r: 6}} />
-                      <Line type="monotone" dataKey="عروض الأسعار الكلية" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{r: 4}} />
+                      <Line type="monotone" dataKey={lang === 'ar' ? 'المبيعات المعتمدة' : 'Approved Sales'} stroke="#10b981" strokeWidth={3} dot={{r: 3, fill: '#10b981', strokeWidth: 2, stroke: '#fff'}} activeDot={{r: 6}} />
+                      <Line type="monotone" dataKey={lang === 'ar' ? 'التحصيلات النقدية' : 'Cash Collections'} stroke="#3b82f6" strokeWidth={3} dot={{r: 3, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff'}} activeDot={{r: 6}} />
+                      <Line type="monotone" dataKey={lang === 'ar' ? 'عروض الأسعار الكلية' : 'Total Quotations'} stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{r: 4}} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -858,7 +858,7 @@ export default function SalesRepsTargets({ lang, user }: Props) {
             <div className="p-6 border-b flex justify-between items-center bg-slate-50">
               <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                 <Users className="w-5 h-5 text-[#005596]" />
-                ترشيح موظف كمندوب مبيعات
+                {lang === 'ar' ? 'ترشيح موظف كمندوب مبيعات' : 'Nominate Employee as Sales Representative'}
               </h3>
               <button onClick={() => setIsAddRepModalOpen(false)} className="text-slate-400 hover:text-red-500 p-2 text-xl font-bold">×</button>
             </div>
@@ -868,7 +868,7 @@ export default function SalesRepsTargets({ lang, user }: Props) {
                 <input 
                   type="text" 
                   autoFocus
-                  placeholder="ابحث بالاسم عن الموظف..." 
+                  placeholder={lang === 'ar' ? 'ابحث بالاسم عن الموظف...' : 'Search for employee by name...'} 
                   value={repSearch}
                   onChange={e => setRepSearch(e.target.value)}
                   className="w-full p-3 pr-10 border rounded-xl text-sm outline-none focus:border-indigo-400 bg-slate-50"
@@ -879,16 +879,16 @@ export default function SalesRepsTargets({ lang, user }: Props) {
             
             <div className="overflow-y-auto p-2" style={{ maxHeight: '400px' }}>
                {otherUsers.length === 0 ? (
-                 <div className="p-8 text-center text-slate-400">لا يوجد مستخدمين متطابقين للبحث.</div>
+                 <div className="p-8 text-center text-slate-400">{lang === 'ar' ? 'لا يوجد مستخدمين متطابقين للبحث.' : 'No matching users found.'}</div>
                ) : (
                  otherUsers.map((sysUser, idx) => (
                    <div key={`${sysUser.username}-${idx}`} className="flex justify-between items-center p-3 hover:bg-slate-50 border-b border-slate-50 last:border-0 rounded-xl transition">
                      <div>
                        <p className="font-bold text-slate-800 text-sm">{getRepDisplayName(sysUser.username)}</p>
-                       <p className="text-[10px] text-slate-500">{sysUser.role || 'مستخدم نظام'}</p>
+                       <p className="text-[10px] text-slate-500">{sysUser.role || (lang === 'ar' ? 'مستخدم نظام' : 'System User')}</p>
                      </div>
                      <button onClick={() => addSalesRep(sysUser.username)} className="text-sm bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-lg font-bold hover:bg-indigo-600 hover:text-white transition shadow-sm border border-indigo-100">
-                       إضافة لقائمة المناديب
+                       {lang === 'ar' ? 'إضافة لقائمة المناديب' : 'Add to Sales Reps List'}
                      </button>
                    </div>
                  ))

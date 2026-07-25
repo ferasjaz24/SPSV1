@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Building2, Phone, Mail, MapPin, User, Search, Filter, Calendar, Save, Trash2, 
+import {
+  Building2, Phone, Mail, MapPin, User, Search, Filter, Calendar, Save, Trash2,
   Upload, Sparkles, Printer, Info, CheckCircle2, AlertTriangle, FileSpreadsheet,
   X, MessageCircle, ChevronDown, ChevronUp
 } from 'lucide-react';
@@ -62,8 +62,8 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
   const [cityFilter, setCityFilter] = useState('');
   const [classFilter, setClassFilter] = useState(''); // Commercial classification
   const [statusFilter, setStatusFilter] = useState(''); // Active, dormant, etc.
-  
-  const [sortOrder, setSortOrder] = useState<'desc'|'asc'>('desc');
+
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [timeFilter, setTimeFilter] = useState('all'); // all, today, month, prev_month, year
 
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
@@ -73,7 +73,7 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
 
   const [noDataToast, setNoDataToast] = useState(false);
   const [showNationalAddress, setShowNationalAddress] = useState(false);
-  
+
   // Country Search state
   const [countrySearch, setCountrySearch] = useState('');
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
@@ -91,6 +91,90 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
     'كوفي', 'مطعم', 'مشروع عقاري', 'مشروع تجاري عملاق',
     'مشروع تجاري', 'تجاري', 'حكومي', 'شخص'
   ];
+
+  // Helper maps for consistent translation
+  const commercialClassesMap: Record<string, string> = {
+    'كوفي': 'Cafe',
+    'مطعم': 'Restaurant',
+    'مشروع عقاري': 'Real Estate Project',
+    'مشروع تجاري عملاق': 'Mega Commercial Project',
+    'مشروع تجاري': 'Commercial Project',
+    'تجاري': 'Commercial',
+    'حكومي': 'Governmental',
+    'شخص': 'Individual'
+  };
+
+  const statusDisplayMap: Record<string, { ar: string, en: string }> = {
+    'عميل نشط': { ar: 'عميل نشط', en: 'Active Client' },
+    'عميل راكد': { ar: 'عميل راكد', en: 'Dormant Client' },
+    'عميل منسي': { ar: 'عميل منسي', en: 'Forgotten Client' },
+    'عميل قديم': { ar: 'عميل قديم', en: 'Old Client' },
+  };
+
+  const quotationStageMap: Record<string, { ar: string, en: string }> = {
+    'معتمد': { ar: 'معتمد', en: 'Approved' },
+    'مسودة': { ar: 'مسودة', en: 'Draft' },
+    'مرفوض': { ar: 'مرفوض', en: 'Rejected' },
+    'قيد المعالجة': { ar: 'قيد المعالجة', en: 'In Progress' },
+    'مكتمل': { ar: 'مكتمل', en: 'Completed' },
+  };
+
+  const countryDisplayMap: Record<string, string> = {
+    'السعودية': 'Saudi Arabia',
+    'الإمارات': 'UAE',
+    'الكويت': 'Kuwait',
+    'قطر': 'Qatar',
+    'البحرين': 'Bahrain',
+    'عمان': 'Oman',
+    'مصر': 'Egypt',
+    'الأردن': 'Jordan',
+    'المغرب': 'Morocco',
+    'الجزائر': 'Algeria',
+    'تونس': 'Tunisia',
+    'العراق': 'Iraq',
+    'اليمن': 'Yemen',
+    'سوريا': 'Syria',
+    'فلسطين': 'Palestine',
+    'لبنان': 'Lebanon',
+    'ليبيا': 'Libya',
+    'السودان': 'Sudan',
+    'موريتانيا': 'Mauritania',
+    'الصومال': 'Somalia',
+    'غير ذلك': 'Other'
+  };
+
+  const saudiRegionsMap: Record<string, string> = {
+    'المنطقة الشرقية': 'Eastern Region',
+    'المنطقة الوسطى': 'Central Region',
+    'المنطقة الشمالية': 'Northern Region',
+    'المنطقة الغربية': 'Western Region',
+    'المنطقة الجنوبية': 'Southern Region'
+  };
+
+  const getTranslatedCommercialClass = (cls: string, currentLang: 'ar' | 'en') => {
+    if (currentLang === 'ar') return cls;
+    return commercialClassesMap[cls] || cls;
+  };
+
+  const getTranslatedStatus = (status: string, currentLang: 'ar' | 'en') => {
+    if (currentLang === 'ar') return statusDisplayMap[status]?.ar || status;
+    return statusDisplayMap[status]?.en || status;
+  };
+
+  const getTranslatedQuotationStage = (stage: string, currentLang: 'ar' | 'en') => {
+    if (currentLang === 'ar') return quotationStageMap[stage]?.ar || stage;
+    return quotationStageMap[stage]?.en || stage;
+  };
+
+  const getTranslatedCountryName = (country: string, currentLang: 'ar' | 'en') => {
+    if (currentLang === 'ar') return country;
+    return countryDisplayMap[country] || country;
+  };
+
+  const getTranslatedSaudiRegionName = (region: string, currentLang: 'ar' | 'en') => {
+    if (currentLang === 'ar') return region;
+    return saudiRegionsMap[region] || region;
+  };
 
   useEffect(() => {
     fetchClients();
@@ -118,16 +202,16 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
   const getClientStatus = (clientId: string) => {
     const clientQuotes = salesQuotes.filter(q => (q.clientId === clientId || q.clientName === getClientName(clientId)) && q.status === 'معتمد');
     if (clientQuotes.length === 0) return 'عميل راكد';
-    
+
     // Get latest approved quote date
     const latestQuote = clientQuotes.sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime())[0];
     const monthsDiff = (new Date().getTime() - new Date(latestQuote.dateCreated).getTime()) / (1000 * 60 * 60 * 24 * 30);
-    
+
     if (monthsDiff <= 1) return 'عميل نشط';
     if (monthsDiff > 12) return 'عميل قديم';
     if (monthsDiff > 5) return 'عميل منسي';
     if (monthsDiff > 2) return 'عميل راكد';
-    return 'عميل نشط'; 
+    return 'عميل نشط';
   };
 
   const getClientName = (id: string) => clients.find(c => c.id === id)?.clientName || '';
@@ -142,18 +226,18 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
     // Cannot delete if linked
     const isLinked = salesQuotes.some(q => q.clientId === id || q.clientName === getClientName(id));
     if (isLinked) {
-      alert(lang === 'ar' ? 'لا يمكن حذف عميل مرتبط بعرض سعر (سواء معتمد أو مسودة)' : 'Cannot delete client linked to quotations');
+      alert(lang === 'ar' ? 'لا يمكن حذف عميل مرتبط بعرض سعر (سواء معتمد أو مسودة)' : 'Cannot delete client linked to quotations (approved or draft)');
       return;
     }
 
-    if (!window.confirm(lang === 'ar' ? 'هل أنت متأكد من حذف العميل نهائياً؟ هذا الإجراء لا يمكن التراجع عنه.' : 'Confirm deletion?')) return;
+    if (!window.confirm(lang === 'ar' ? 'هل أنت متأكد من حذف العميل نهائياً؟ هذا الإجراء لا يمكن التراجع عنه.' : 'Are you sure you want to permanently delete this client? This action cannot be undone.')) return;
 
     try {
       const res = await fetch(`/api/clients/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setClients(clients.filter(c => c.id !== id));
       }
-    } catch(e) {
+    } catch (e) {
       console.error(e);
     }
   };
@@ -167,19 +251,19 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
     const payload = {
       ...editingClient,
       isDraft: !isManualSave,
-      ...(editingClient.id ? {} : { createdBy: user?.username || 'المستخدم الحالي' })
+      ...(editingClient.id ? {} : { createdBy: user?.username || (lang === 'ar' ? 'المستخدم الحالي' : 'Current User') })
     };
 
     try {
       const method = payload.id ? 'PUT' : 'POST';
       const url = payload.id ? `/api/clients/${payload.id}` : '/api/clients';
-      
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      
+
       if (res.ok) {
         const saved = payload.id ? payload : (await res.json()).client;
         setClients(prev => {
@@ -200,7 +284,7 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
   const handleModalClose = () => {
     // Auto save as draft if there's text
     if (editingClient && (editingClient.clientName || editingClient.mobile)) {
-       handleSaveClient(false); // save as draft
+      handleSaveClient(false); // save as draft
     }
     setIsClientModalOpen(false);
     setEditingClient(null);
@@ -216,7 +300,7 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
       try {
         const res = await fetch('/api/gemini/parse-client', {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ fileBase64: reader.result })
         });
         if (res.ok) {
@@ -226,14 +310,14 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
             return;
           }
           setEditingClient({
-             ...editingClient,
-             clientName: data.clientName || '',
-             companyName: data.companyName || '',
-             mobile: data.mobile || '',
-             email: data.email || '',
-             city: data.city || '',
-             crNumber: data.crNumber || '',
-             taxNumber: data.taxNumber || ''
+            ...editingClient,
+            clientName: data.clientName || '',
+            companyName: data.companyName || '',
+            mobile: data.mobile || '',
+            email: data.email || '',
+            city: data.city || '',
+            crNumber: data.crNumber || '',
+            taxNumber: data.taxNumber || ''
           });
           setIsClientModalOpen(true);
         }
@@ -254,28 +338,28 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
     if (searchTerm && !c.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) && !c.companyName?.toLowerCase().includes(searchTerm.toLowerCase())) return false;
     if (cityFilter && !c.city?.toLowerCase().includes(cityFilter.toLowerCase())) return false;
     if (classFilter && c.classification !== classFilter) return false;
-    
+
     // Status Filter
     if (statusFilter) {
-       const stat = getClientStatus(c.id);
-       if (stat !== statusFilter) return false;
+      const stat = getClientStatus(c.id);
+      if (stat !== statusFilter) return false;
     }
 
     // Time filter
     if (timeFilter !== 'all' && c.dateCreated) {
-       const cd = new Date(c.dateCreated);
-       const now = new Date();
-       if (timeFilter === 'today') {
-         if (cd.toDateString() !== now.toDateString()) return false;
-       } else if (timeFilter === 'month') {
-         if (cd.getMonth() !== now.getMonth() || cd.getFullYear() !== now.getFullYear()) return false;
-       } else if (timeFilter === 'prev_month') {
-         const prevM = new Date();
-         prevM.setMonth(prevM.getMonth() - 1);
-         if (cd.getMonth() !== prevM.getMonth() || cd.getFullYear() !== prevM.getFullYear()) return false;
-       } else if (timeFilter === 'year') {
-         if (cd.getFullYear() !== now.getFullYear()) return false;
-       }
+      const cd = new Date(c.dateCreated);
+      const now = new Date();
+      if (timeFilter === 'today') {
+        if (cd.toDateString() !== now.toDateString()) return false;
+      } else if (timeFilter === 'month') {
+        if (cd.getMonth() !== now.getMonth() || cd.getFullYear() !== now.getFullYear()) return false;
+      } else if (timeFilter === 'prev_month') {
+        const prevM = new Date();
+        prevM.setMonth(prevM.getMonth() - 1);
+        if (cd.getMonth() !== prevM.getMonth() || cd.getFullYear() !== prevM.getFullYear()) return false;
+      } else if (timeFilter === 'year') {
+        if (cd.getFullYear() !== now.getFullYear()) return false;
+      }
     }
     return true;
   }).sort((a, b) => {
@@ -287,78 +371,81 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
   const printClientDetails = (client: Client) => {
     const printWin = window.open('', '_blank');
     if (!printWin) return;
-    
+
     const clientQuotes = salesQuotes.filter(q => (q.clientId === client.id || q.clientName === client.clientName) && q.status === 'معتمد');
+    const displayDirection = lang === 'ar' ? 'rtl' : 'ltr';
+    const displayAlign = lang === 'ar' ? 'right' : 'left';
+    const printFontFamily = lang === 'ar' ? "'EnglishNumbersOnly', 'GE SS Two', 'Gotham Pro', Tahoma, Arial" : "'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif";
 
     const printContent = `
-      <div style="font-family: 'EnglishNumbersOnly', 'GE SS Two', 'Gotham Pro', Tahoma, Arial; direction: rtl; text-align: right; padding: 20px;">
-        <h2 style="color: #005596; text-align: center; border-bottom: 2px solid #005596; padding-bottom: 10px;">سجل وملخص العميل</h2>
-        
+      <div style="font-family: ${printFontFamily}; direction: ${displayDirection}; text-align: ${displayAlign}; padding: 20px;">
+        <h2 style="color: #005596; text-align: center; border-bottom: 2px solid #005596; padding-bottom: 10px;">${lang === 'ar' ? 'سجل وملخص العميل' : 'Client Record & Summary'}</h2>
+
         <table style="width: 100%; margin-top: 20px; border-collapse: collapse;">
           <tr>
-            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc; width: 25%;">اسم العميل</th>
+            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc; width: 25%;">${lang === 'ar' ? 'اسم العميل' : 'Client Name'}</th>
             <td style="border: 1px solid #ccc; padding: 10px; font-weight: bold;">${client.clientName || '---'}</td>
-            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc; width: 25%;">اسم الشركة / المنشأة</th>
+            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc; width: 25%;">${lang === 'ar' ? 'اسم الشركة / المنشأة' : 'Company/Establishment Name'}</th>
             <td style="border: 1px solid #ccc; padding: 10px; font-weight: bold;">${client.companyName || '---'}</td>
           </tr>
           <tr>
-            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">رقم الجوال</th>
+            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">${lang === 'ar' ? 'رقم الجوال' : 'Mobile Number'}</th>
             <td style="border: 1px solid #ccc; padding: 10px;">${client.mobile || '---'}</td>
-            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">البريد الإلكتروني</th>
+            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">${lang === 'ar' ? 'البريد الإلكتروني' : 'Email'}</th>
             <td style="border: 1px solid #ccc; padding: 10px;">${client.email || '---'}</td>
           </tr>
-           
+
           <tr>
-            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">الدولة</th>
-            <td style="border: 1px solid #ccc; padding: 10px;">${client.country || '---'}</td>
-             <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">الاقليم / المنطقة</th>
-            <td style="border: 1px solid #ccc; padding: 10px;">${client.region || '---'}</td>
+            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">${lang === 'ar' ? 'الدولة' : 'Country'}</th>
+            <td style="border: 1px solid #ccc; padding: 10px;">${getTranslatedCountryName(client.country || '---', lang)}</td>
+             <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">${lang === 'ar' ? 'الاقليم / المنطقة' : 'Region / Area'}</th>
+            <td style="border: 1px solid #ccc; padding: 10px;">${getTranslatedSaudiRegionName(client.region || '---', lang)}</td>
           </tr>
           <tr>
-             <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">المدينة</th>
+             <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">${lang === 'ar' ? 'المدينة' : 'City'}</th>
             <td style="border: 1px solid #ccc; padding: 10px;">${client.city || '---'}</td>
-            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">التصنيف التجاري</th>
-            <td style="border: 1px solid #ccc; padding: 10px;">${client.classification || '---'}</td>
+            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">${lang === 'ar' ? 'التصنيف التجاري' : 'Commercial Classification'}</th>
+            <td style="border: 1px solid #ccc; padding: 10px;">${getTranslatedCommercialClass(client.classification || '---', lang)}</td>
           </tr>
           <tr>
-            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">السجل التجاري</th>
+            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">${lang === 'ar' ? 'السجل التجاري' : 'Commercial Reg. No.'}</th>
             <td style="border: 1px solid #ccc; padding: 10px;">${client.crNumber || '---'}</td>
-            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">الرقم الضريبي</th>
-            <td style="border: 1px solid #ccc; padding: 10px;">${client.taxExempt ? 'معفى من الضريبة' : client.taxNumber || '---'}</td>
+            <th style="border: 1px solid #ccc; padding: 10px; background: #f8fafc;">${lang === 'ar' ? 'الرقم الضريبي' : 'VAT Number'}</th>
+            <td style="border: 1px solid #ccc; padding: 10px;">${client.taxExempt ? (lang === 'ar' ? 'معفى من الضريبة' : 'Tax Exempt') : client.taxNumber || '---'}</td>
           </tr>
         </table>
 
         ${client.nationalAddress && (client.nationalAddress.buildingNumber || client.nationalAddress.streetName || client.nationalAddress.district || client.nationalAddress.city || client.nationalAddress.postalCode || client.nationalAddress.additionalNumber) ? `
-        <h3 style="color: #334155; margin-top: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">تفاصيل العنوان الوطني</h3>
+        <h3 style="color: #334155; margin-top: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">${lang === 'ar' ? 'تفاصيل العنوان الوطني' : 'National Address Details'}</h3>
         <table style="width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 13px;">
           <tr>
-            <th style="border: 1px solid #ccc; padding: 8px; background: #f8fafc;">رقم المبنى</th>
+            <th style="border: 1px solid #ccc; padding: 8px; background: #f8fafc;">${lang === 'ar' ? 'رقم المبنى' : 'Building Number'}</th>
             <td style="border: 1px solid #ccc; padding: 8px;">${client.nationalAddress.buildingNumber || '---'}</td>
-            <th style="border: 1px solid #ccc; padding: 8px; background: #f8fafc;">اسم الشارع</th>
+            <th style="border: 1px solid #ccc; padding: 8px; background: #f8fafc;">${lang === 'ar' ? 'اسم الشارع' : 'Street Name'}</th>
             <td style="border: 1px solid #ccc; padding: 8px;">${client.nationalAddress.streetName || '---'}</td>
           </tr>
           <tr>
-            <th style="border: 1px solid #ccc; padding: 8px; background: #f8fafc;">اسم الحي</th>
+            <th style="border: 1px solid #ccc; padding: 8px; background: #f8fafc;">${lang === 'ar' ? 'اسم الحي' : 'District Name'}</th>
             <td style="border: 1px solid #ccc; padding: 8px;">${client.nationalAddress.district || '---'}</td>
-            <th style="border: 1px solid #ccc; padding: 8px; background: #f8fafc;">المدينة</th>
+            <th style="border: 1px solid #ccc; padding: 8px; background: #f8fafc;">${lang === 'ar' ? 'المدينة' : 'City'}</th>
             <td style="border: 1px solid #ccc; padding: 8px;">${client.nationalAddress.city || '---'}</td>
           </tr>
            <tr>
-             <th style="border: 1px solid #ccc; padding: 8px; background: #f8fafc;">الرمز البريدي</th>
+             <th style="border: 1px solid #ccc; padding: 8px; background: #f8fafc;">${lang === 'ar' ? 'الرمز البريدي' : 'Postal Code'}</th>
             <td style="border: 1px solid #ccc; padding: 8px;">${client.nationalAddress.postalCode || '---'}</td>
-             <th style="border: 1px solid #ccc; padding: 8px; background: #f8fafc;">الرقم الإضافي</th>
+             <th style="border: 1px solid #ccc; padding: 8px; background: #f8fafc;">${lang === 'ar' ? 'الرقم الإضافي' : 'Additional Number'}</th>
             <td style="border: 1px solid #ccc; padding: 8px;">${client.nationalAddress.additionalNumber || '---'}</td>
           </tr>
         </table>` : ''}
 
-        <h3 style="color: #334155; margin-top: 40px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">سجل عروض الأسعار المرتبطة</h3>
+        <h3 style="color: #334155; margin-top: 40px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">${lang === 'ar' ? 'سجل عروض الأسعار المرتبطة' : 'Associated Quotation History'}</h3>
         <table style="width: 100%; margin-top: 15px; border-collapse: collapse; font-size: 13px;">
           <thead>
             <tr>
-              <th style="border: 1px solid #ccc; padding: 8px; background: #f1f5f9;">رقم العرض</th>
-              <th style="border: 1px solid #ccc; padding: 8px; background: #f1f5f9;">المشروع</th>
-              <th style="border: 1px solid #ccc; padding: 8px; background: #f1f5f9;">التاريخ</th>
-              <th style="border: 1px solid #ccc; padding: 8px; background: #f1f5f9;">الحالة</th>
+              <th style="border: 1px solid #ccc; padding: 8px; background: #f1f5f9;">${lang === 'ar' ? 'رقم العرض' : 'Quote No.'}</th>
+              <th style="border: 1px solid #ccc; padding: 8px; background: #f1f5f9;">${lang === 'ar' ? 'المشروع' : 'Project'}</th>
+              <th style="border: 1px solid #ccc; padding: 8px; background: #f1f5f9;">${lang === 'ar' ? 'التاريخ' : 'Date'}</th>
+              <th style="border: 1px solid #ccc; padding: 8px; background: #f1f5f9;">${lang === 'ar' ? 'الحالة' : 'Status'}</th>
             </tr>
           </thead>
           <tbody>
@@ -366,10 +453,10 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
               <tr>
                 <td style="border: 1px solid #ccc; padding: 8px; text-align: center;">${q.quotationNumber || q.id}</td>
                 <td style="border: 1px solid #ccc; padding: 8px;">${q.projectName || '--'}</td>
-                <td style="border: 1px solid #ccc; padding: 8px; text-align: center;">${q.quoteDate || new Date(q.dateCreated).toLocaleDateString('en-GB')}</td>
-                <td style="border: 1px solid #ccc; padding: 8px; text-align: center;">${q.stage}</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: center;">${q.quoteDate || new Date(q.dateCreated).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-GB')}</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: center;">${getTranslatedQuotationStage(q.stage, lang)}</td>
               </tr>
-            `).join('') : `<tr><td colspan="4" style="border: 1px solid #ccc; padding: 15px; text-align: center; color: #64748b;">لا توجد عروض أسعار مسجلة لهذا العميل.</td></tr>`}
+            `).join('') : `<tr><td colspan="4" style="border: 1px solid #ccc; padding: 15px; text-align: center; color: #64748b;">${lang === 'ar' ? 'لا توجد عروض أسعار مسجلة لهذا العميل.' : 'No quotations recorded for this client.'}</td></tr>`}
           </tbody>
         </table>
       </div>
@@ -377,12 +464,12 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
 
     printWin.document.write(`
       <!DOCTYPE html>
-      <html lang="ar" dir="rtl">
+      <html lang="${lang}" dir="${displayDirection}">
         <head>
-          <title>سجل العميل - ${client.clientName}</title>
+          <title>${lang === 'ar' ? 'سجل العميل' : 'Client Record'} - ${client.clientName}</title>
           <style>${sharedPrintStyles}</style>
         </head>
-        <body style="background: #fff; direction: rtl; text-align: right; font-family: 'EnglishNumbersOnly', 'GE SS Two', 'Gotham Pro', sans-serif;">
+        <body style="background: #fff; direction: ${displayDirection}; text-align: ${displayAlign}; font-family: ${printFontFamily};">
           ${sharedPrintHeader}
           ${printContent}
           ${sharedPrintFooter}
@@ -404,13 +491,13 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
     return `https://api.whatsapp.com/send?phone=${clean}`;
   };
 
-  if (loading) return <div className="p-10 text-center animate-pulse text-[#005596] font-bold text-xl">جاري تحميل العملاء...</div>;
+  if (loading) return <div className="p-10 text-center animate-pulse text-[#005596] font-bold text-xl">{lang === 'ar' ? 'جاري تحميل العملاء...' : 'Loading clients...'}</div>;
 
   return (
-    <div className="space-y-6 animate-fade-in font-sans" dir="rtl">
+    <div className="space-y-6 animate-fade-in font-sans" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       {noDataToast && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-bold shadow-xl animate-fade-in flex items-center gap-2">
-          <AlertTriangle className="w-5 h-5"/>
+          <AlertTriangle className="w-5 h-5" />
           {lang === 'ar' ? 'لا توجد معلومات للعملاء من الملف' : 'No client information found from file'}
         </div>
       )}
@@ -424,7 +511,7 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
           </h2>
           <p className="text-xs text-slate-500 mt-1">{lang === 'ar' ? 'هذا القسم لإدارة العملاء فقط.' : 'This section is strictly for client administration.'}</p>
         </div>
-        
+
         <div className="flex flex-wrap gap-2 justify-end">
           <input type="file" accept=".pdf,.csv,.xlsx" hidden ref={fileInputRef} onChange={handleAIParse} />
           <input type="file" accept="image/*" hidden ref={imageInputRef} onChange={handleAIParse} />
@@ -433,7 +520,7 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
             <Sparkles className="w-4 h-4" />
             {lang === 'ar' ? 'استيراد وقراءة بالذكاء الاصطناعي (صور)' : 'AI Parse from Image'}
           </button>
-          
+
           <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold transition">
             <Sparkles className="w-4 h-4" />
             {lang === 'ar' ? 'استيراد بالذكاء الاصطناعي (PDF/Excel)' : 'AI Parse from Excel/PDF'}
@@ -450,9 +537,9 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
       <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3 text-xs font-bold text-slate-600">
         <div className="col-span-1 md:col-span-2">
           <label className="block mb-1">{lang === 'ar' ? 'البحث بالاسم / الشركة:' : 'Search Name/Company:'}</label>
-          <input 
-            type="text" 
-            value={searchTerm} 
+          <input
+            type="text"
+            value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="..."
             className="w-full p-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-[#005596]"
@@ -460,9 +547,9 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
         </div>
         <div>
           <label className="block mb-1">{lang === 'ar' ? 'تصفية بالمدينة:' : 'Filter by City:'}</label>
-          <input 
-            type="text" 
-            value={cityFilter} 
+          <input
+            type="text"
+            value={cityFilter}
             onChange={e => setCityFilter(e.target.value)}
             placeholder="..."
             className="w-full p-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-[#005596]"
@@ -472,17 +559,17 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
           <label className="block mb-1">{lang === 'ar' ? 'التصنيف التجاري:' : 'Comm. Class:'}</label>
           <select value={classFilter} onChange={e => setClassFilter(e.target.value)} className="w-full p-2.5 bg-white border border-slate-200 rounded-xl">
             <option value="">{lang === 'ar' ? 'الكل' : 'All'}</option>
-            {commercialClasses.map(c => <option key={c} value={c}>{c}</option>)}
+            {commercialClasses.map(c => <option key={c} value={c}>{getTranslatedCommercialClass(c, lang)}</option>)}
           </select>
         </div>
         <div>
-          <label className="block mb-1">{lang === 'ar' ? 'حالة العميل (ديناميكي):' : 'Status:'}</label>
+          <label className="block mb-1">{lang === 'ar' ? 'حالة العميل (ديناميكي):' : 'Client Status (Dynamic):'}</label>
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="w-full p-2.5 bg-white border border-slate-200 rounded-xl">
             <option value="">{lang === 'ar' ? 'الكل' : 'All'}</option>
-            <option value="عميل نشط">عميل نشط (آخر طلب &lt; شهر)</option>
-            <option value="عميل راكد">عميل راكد (&gt; شهرين)</option>
-            <option value="عميل منسي">عميل منسي (&gt; 5 شهور)</option>
-            <option value="عميل قديم">عميل قديم (&gt; سنة)</option>
+            <option value="عميل نشط">{lang === 'ar' ? 'عميل نشط (آخر طلب < شهر)' : 'Active Client (Last order < 1 month)'}</option>
+            <option value="عميل راكد">{lang === 'ar' ? 'عميل راكد (> شهرين)' : 'Dormant Client (> 2 months)'}</option>
+            <option value="عميل منسي">{lang === 'ar' ? 'عميل منسي (> 5 شهور)' : 'Forgotten Client (> 5 months)'}</option>
+            <option value="عميل قديم">{lang === 'ar' ? 'عميل قديم (> سنة)' : 'Old Client (> 1 year)'}</option>
           </select>
         </div>
         <div>
@@ -507,199 +594,199 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
       {/* CLIENTS LIST */}
       <div className="space-y-4">
         {filteredClients.map(client => {
-           const stat = getClientStatus(client.id);
-           const isExpanded = expandedClientId === client.id;
-           let statColor = 'bg-slate-100 text-slate-600';
-           if (stat === 'عميل نشط') statColor = 'bg-emerald-100/60 text-emerald-700';
-           if (stat === 'عميل راكد') statColor = 'bg-amber-100/60 text-amber-700';
-           if (stat === 'عميل منسي') statColor = 'bg-orange-100/60 text-orange-700';
-           if (stat === 'عميل قديم') statColor = 'bg-rose-100/60 text-rose-700';
+          const stat = getClientStatus(client.id);
+          const isExpanded = expandedClientId === client.id;
+          let statColor = 'bg-slate-100 text-slate-600';
+          if (stat === 'عميل نشط') statColor = 'bg-emerald-100/60 text-emerald-700';
+          if (stat === 'عميل راكد') statColor = 'bg-amber-100/60 text-amber-700';
+          if (stat === 'عميل منسي') statColor = 'bg-orange-100/60 text-orange-700';
+          if (stat === 'عميل قديم') statColor = 'bg-rose-100/60 text-rose-700';
 
-           return (
-             <div key={client.id} className="bg-white border flex flex-col rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition duration-200 p-1">
-               {/* Simplified View Header */}
-               <div className="p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                 <div className="flex-1 flex flex-col gap-1">
-                   <div className="flex items-center gap-3">
-                     <h3 className="font-extrabold text-slate-800 text-sm">{client.clientName}</h3>
-                     {client.isDraft && <span className="px-2 py-0.5 bg-rose-100 text-rose-700 text-[10px] rounded font-black">مسودة</span>}
-                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${statColor}`}>{stat}</span>
-                   </div>
-                   <div className="flex items-center gap-4 text-xs font-bold text-slate-500 mt-1">
-                     <span className="flex items-center gap-1"><Phone className="w-3 h-3"/> {client.mobile || '---'}</span>
-                     <span className="flex items-center gap-1"><Building2 className="w-3 h-3"/> {client.companyName || '---'}</span>
-                     <span className="flex items-center gap-1"><MapPin className="w-3 h-3"/> {client.city || '---'}</span>
-                   </div>
-                 </div>
-                 <div>
-                   <button 
-                     onClick={() => setExpandedClientId(isExpanded ? null : client.id)}
-                     className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-black transition"
-                   >
-                     {isExpanded ? (lang === 'ar' ? 'إخفاء التفاصيل ▲' : 'Hide Details ▲') : (lang === 'ar' ? 'عرض التفاصيل ▼' : 'Show Details ▼')}
-                   </button>
-                 </div>
-               </div>
+          return (
+            <div key={client.id} className="bg-white border flex flex-col rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition duration-200 p-1">
+              {/* Simplified View Header */}
+              <div className="p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex-1 flex flex-col gap-1">
+                  <div className="flex items-center gap-3">
+                    <h3 className="font-extrabold text-slate-800 text-sm">{client.clientName}</h3>
+                    {client.isDraft && <span className="px-2 py-0.5 bg-rose-100 text-rose-700 text-[10px] rounded font-black">{lang === 'ar' ? 'مسودة' : 'Draft'}</span>}
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${statColor}`}>{getTranslatedStatus(stat, lang)}</span>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs font-bold text-slate-500 mt-1">
+                    <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {client.mobile || '---'}</span>
+                    <span className="flex items-center gap-1"><Building2 className="w-3 h-3" /> {client.companyName || '---'}</span>
+                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {client.city || '---'}</span>
+                  </div>
+                </div>
+                <div>
+                  <button
+                    onClick={() => setExpandedClientId(isExpanded ? null : client.id)}
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-black transition"
+                  >
+                    {isExpanded ? (lang === 'ar' ? 'إخفاء التفاصيل ▲' : 'Hide Details ▲') : (lang === 'ar' ? 'عرض التفاصيل ▼' : 'Show Details ▼')}
+                  </button>
+                </div>
+              </div>
 
-               {/* Expanded Details View */}
-               {isExpanded && (
-                 <div className="p-5 bg-slate-50 border-t border-slate-100 animate-fade-in relative space-y-5">
-                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-                      <div>
-                        <p className="text-slate-400 mb-1">البريد الإلكتروني:</p>
-                        <p className="font-bold">{client.email || 'غير متوفر'}</p>
-                      </div>
-                      <div>
-                        <p className="text-slate-400 mb-1">السجل التجاري:</p>
-                        <p className="font-bold">{client.crNumber || 'غير متوفر'}</p>
-                      </div>
-                      <div>
-                        <p className="text-slate-400 mb-1">الرقم الضريبي:</p>
-                        <p className="font-bold">{client.taxExempt ? <span className="text-emerald-600">معفى من الضريبة</span> : client.taxNumber || 'غير متوفر'}</p>
-                      </div>
-                      <div>
-                        <p className="text-slate-400 mb-1">تصنيف النشاط:</p>
-                        <p className="font-bold">{client.classification || 'غير متوفر'}</p>
-                      </div>
-                      <div>
-                        <p className="text-slate-400 mb-1">تاريخ الإضافة بالنظام:</p>
-                        <p className="font-bold font-mono">{client.dateCreated ? new Date(client.dateCreated).toLocaleString('en-GB') : 'غير متوفر'}</p>
-                      </div>
-                   </div>
+              {/* Expanded Details View */}
+              {isExpanded && (
+                <div className="p-5 bg-slate-50 border-t border-slate-100 animate-fade-in relative space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                    <div>
+                      <p className="text-slate-400 mb-1">{lang === 'ar' ? 'البريد الإلكتروني:' : 'Email:'}</p>
+                      <p className="font-bold">{client.email || (lang === 'ar' ? 'غير متوفر' : 'N/A')}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 mb-1">{lang === 'ar' ? 'السجل التجاري:' : 'Commercial Reg. No.:'}</p>
+                      <p className="font-bold">{client.crNumber || (lang === 'ar' ? 'غير متوفر' : 'N/A')}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 mb-1">{lang === 'ar' ? 'الرقم الضريبي:' : 'VAT Number:'}</p>
+                      <p className="font-bold">{client.taxExempt ? <span className="text-emerald-600">{lang === 'ar' ? 'معفى من الضريبة' : 'Tax Exempt'}</span> : client.taxNumber || (lang === 'ar' ? 'غير متوفر' : 'N/A')}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 mb-1">{lang === 'ar' ? 'تصنيف النشاط:' : 'Activity Classification:'}</p>
+                      <p className="font-bold">{getTranslatedCommercialClass(client.classification || (lang === 'ar' ? 'غير متوفر' : 'N/A'), lang)}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 mb-1">{lang === 'ar' ? 'تاريخ الإضافة بالنظام:' : 'Date Added:'}</p>
+                      <p className="font-bold font-mono">{client.dateCreated ? new Date(client.dateCreated).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-GB') : (lang === 'ar' ? 'غير متوفر' : 'N/A')}</p>
+                    </div>
+                  </div>
 
-                   <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-200">
-                     <button 
-                       onClick={() => window.open(getWhatsAppLink(client.mobile), '_blank')}
-                       className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black transition"
-                     >
-                       <MessageCircle className="w-4 h-4" />
-                       التواصل على الواتس اب
-                     </button>
-                     
-                     <button 
-                       onClick={() => {
-                          setEditingClient(client);
-                          setIsClientModalOpen(true);
-                       }}
-                       className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-black transition"
-                     >
-                       <Building2 className="w-4 h-4" />
-                       تعديل البيانات
-                     </button>
+                  <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-200">
+                    <button
+                      onClick={() => window.open(getWhatsAppLink(client.mobile), '_blank')}
+                      className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black transition"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      {lang === 'ar' ? 'التواصل على الواتس اب' : 'Contact on WhatsApp'}
+                    </button>
 
-                     <button 
-                       onClick={() => printClientDetails(client)}
-                       className="flex items-center gap-2 px-4 py-2 bg-[#005596] hover:bg-sky-700 text-white rounded-xl text-xs font-black transition"
-                     >
-                       <Printer className="w-4 h-4" />
-                       طباعة سجل عميل
-                     </button>
+                    <button
+                      onClick={() => {
+                        setEditingClient(client);
+                        setIsClientModalOpen(true);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-black transition"
+                    >
+                      <Building2 className="w-4 h-4" />
+                      {lang === 'ar' ? 'تعديل البيانات' : 'Edit Details'}
+                    </button>
 
-                     <button 
-                         onClick={() => handleDeleteClient(client.id)}
-                         className="flex items-center gap-2 px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-black transition mr-auto"
-                       >
-                         <Trash2 className="w-4 h-4" />
-                         حذف العميل نهائياً
-                       </button>
-                   </div>
-                 </div>
-               )}
-             </div>
-           )
+                    <button
+                      onClick={() => printClientDetails(client)}
+                      className="flex items-center gap-2 px-4 py-2 bg-[#005596] hover:bg-sky-700 text-white rounded-xl text-xs font-black transition"
+                    >
+                      <Printer className="w-4 h-4" />
+                      {lang === 'ar' ? 'طباعة سجل عميل' : 'Print Client Record'}
+                    </button>
+
+                    <button
+                      onClick={() => handleDeleteClient(client.id)}
+                      className="flex items-center gap-2 px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-black transition mr-auto"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      {lang === 'ar' ? 'حذف العميل نهائياً' : 'Delete Client Permanently'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )
         })}
         {filteredClients.length === 0 && (
           <div className="p-10 text-center text-slate-400 font-bold bg-white border rounded-2xl">
-            لا توجد بيانات عملاء متطابقة مع البحث
+            {lang === 'ar' ? 'لا توجد بيانات عملاء متطابقة مع البحث' : 'No clients matching the search criteria were found.'}
           </div>
         )}
       </div>
 
       {/* ADD/EDIT CLIENT MODAL */}
       {isClientModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in" dir="rtl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <h3 className="font-extrabold text-[#005596] flex items-center gap-2">
-                <User className="w-5 h-5"/>
-                {editingClient?.id ? 'تعديل بيانات العميل' : 'إضافة عميل جديد للنظام'}
+                <User className="w-5 h-5" />
+                {lang === 'ar' ? (editingClient?.id ? 'تعديل بيانات العميل' : 'إضافة عميل جديد للنظام') : (editingClient?.id ? 'Edit Client Details' : 'Add New Client to System')}
               </h3>
               <button onClick={handleModalClose} className="p-2 hover:bg-slate-200 rounded-full transition">
                 <X className="w-5 h-5 text-slate-500" />
               </button>
             </div>
-            
+
             <div className="p-6 overflow-y-auto flex-1 text-sm font-bold text-slate-600 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block mb-1.5">اسم العميل <span className="text-rose-500">*</span></label>
-                  <input 
-                    type="text" 
+                  <label className="block mb-1.5">{lang === 'ar' ? 'اسم العميل' : 'Client Name'} <span className="text-rose-500">*</span></label>
+                  <input
+                    type="text"
                     value={editingClient?.clientName || ''}
-                    onChange={e => setEditingClient({...editingClient, clientName: e.target.value})}
+                    onChange={e => setEditingClient({ ...editingClient, clientName: e.target.value })}
                     className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-[#005596]"
-                    placeholder="اسم المسؤول أو الشخص..."
+                    placeholder={lang === 'ar' ? 'اسم المسؤول أو الشخص...' : 'Contact Person or Name...'}
                   />
                 </div>
                 <div>
-                  <label className="block mb-1.5">رقم الجوال <span className="text-rose-500">*</span></label>
-                  <input 
-                    type="tel" 
+                  <label className="block mb-1.5">{lang === 'ar' ? 'رقم الجوال' : 'Mobile Number'} <span className="text-rose-500">*</span></label>
+                  <input
+                    type="tel"
                     value={editingClient?.mobile || ''}
-                    onChange={e => setEditingClient({...editingClient, mobile: e.target.value})}
+                    onChange={e => setEditingClient({ ...editingClient, mobile: e.target.value })}
                     className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-[#005596]"
                     placeholder="05..."
                     dir="ltr"
-                    style={{ textAlign: 'right' }}
+                    style={{ textAlign: lang === 'ar' ? 'right' : 'left' }}
                   />
                 </div>
                 <div>
-                  <label className="block mb-1.5">اسم الشركة / المنشأة التجاري</label>
-                  <input 
-                    type="text" 
+                  <label className="block mb-1.5">{lang === 'ar' ? 'اسم الشركة / المنشأة التجاري' : 'Company/Establishment Name'}</label>
+                  <input
+                    type="text"
                     value={editingClient?.companyName || ''}
-                    onChange={e => setEditingClient({...editingClient, companyName: e.target.value})}
+                    onChange={e => setEditingClient({ ...editingClient, companyName: e.target.value })}
                     className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-[#005596]"
-                    placeholder="مطاعم..."
+                    placeholder={lang === 'ar' ? 'مطاعم...' : 'Restaurants...'}
                   />
                 </div>
-                
+
                 {/* Country Selection */}
                 <div className="relative">
-                  <label className="block mb-1.5">دولة العميل</label>
-                  <div 
+                  <label className="block mb-1.5">{lang === 'ar' ? 'دولة العميل' : 'Client Country'}</label>
+                  <div
                     className="w-full p-2.5 border border-slate-300 rounded-xl cursor-pointer bg-white flex justify-between items-center"
                     onClick={() => setShowCountryDropdown(!showCountryDropdown)}
                   >
                     <span>
-                      {editingClient?.country ? (arabCountries.find(c => c.name === editingClient.country)?.flag || '🌍') + ' ' + editingClient.country : 'اختر الدولة...'}
+                      {editingClient?.country ? (arabCountries.find(c => c.name === editingClient.country)?.flag || '🌍') + ' ' + getTranslatedCountryName(editingClient.country, lang) : (lang === 'ar' ? 'اختر الدولة...' : 'Select Country...')}
                     </span>
                     <ChevronDown className="w-4 h-4 text-slate-400" />
                   </div>
                   {showCountryDropdown && (
                     <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 shadow-xl rounded-xl z-50 overflow-hidden">
                       <div className="p-2 border-b">
-                        <input 
-                          type="text" 
-                          placeholder="ابحث عن دولة..." 
+                        <input
+                          type="text"
+                          placeholder={lang === 'ar' ? 'ابحث عن دولة...' : 'Search for a country...'}
                           className="w-full p-2 bg-slate-50 border rounded-lg outline-none"
                           value={countrySearch}
                           onChange={(e) => setCountrySearch(e.target.value)}
                         />
                       </div>
                       <div className="max-h-48 overflow-y-auto p-2">
-                        {arabCountries.filter(c => c.name.includes(countrySearch)).map(country => (
-                          <div 
+                        {arabCountries.filter(c => getTranslatedCountryName(c.name, lang).toLowerCase().includes(countrySearch.toLowerCase())).map(country => (
+                          <div
                             key={country.name}
                             className="p-2 hover:bg-slate-50 cursor-pointer rounded-lg flex items-center gap-2"
                             onClick={() => {
-                               setEditingClient({...editingClient, country: country.name, region: '', city: ''});
-                               setShowCountryDropdown(false);
-                               setCountrySearch('');
+                              setEditingClient({ ...editingClient, country: country.name, region: '', city: '' });
+                              setShowCountryDropdown(false);
+                              setCountrySearch('');
                             }}
                           >
                             <span>{country.flag}</span>
-                            <span>{country.name}</span>
+                            <span>{getTranslatedCountryName(country.name, lang)}</span>
                           </div>
                         ))}
                       </div>
@@ -710,59 +797,59 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
                 {/* Region if KSA */}
                 {editingClient?.country === 'السعودية' && (
                   <div>
-                    <label className="block mb-1.5">اقليم العميل</label>
-                    <select 
+                    <label className="block mb-1.5">{lang === 'ar' ? 'اقليم العميل' : 'Client Region'}</label>
+                    <select
                       value={editingClient?.region || ''}
-                      onChange={e => setEditingClient({...editingClient, region: e.target.value, city: ''})}
+                      onChange={e => setEditingClient({ ...editingClient, region: e.target.value, city: '' })}
                       className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-[#005596]"
                     >
-                      <option value="">اختر الإقليم...</option>
-                      {saudiRegions.map(r => <option key={r} value={r}>{r}</option>)}
+                      <option value="">{lang === 'ar' ? 'اختر الإقليم...' : 'Select Region...'}</option>
+                      {saudiRegions.map(r => <option key={r} value={r}>{getTranslatedSaudiRegionName(r, lang)}</option>)}
                     </select>
                   </div>
                 )}
 
                 {/* City based on logic */}
                 <div>
-                  <label className="block mb-1.5">المدينة / المنطقة</label>
+                  <label className="block mb-1.5">{lang === 'ar' ? 'المدينة / المنطقة' : 'City / Area'}</label>
                   {editingClient?.country === 'السعودية' && editingClient?.region ? (
-                    <select 
+                    <select
                       value={editingClient?.city || ''}
-                      onChange={e => setEditingClient({...editingClient, city: e.target.value})}
+                      onChange={e => setEditingClient({ ...editingClient, city: e.target.value })}
                       className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-[#005596]"
                     >
-                      <option value="">اختر المدينة...</option>
+                      <option value="">{lang === 'ar' ? 'اختر المدينة...' : 'Select City...'}</option>
                       {saudiCities[editingClient?.region as keyof typeof saudiCities]?.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   ) : (
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={editingClient?.city || ''}
-                      onChange={e => setEditingClient({...editingClient, city: e.target.value})}
+                      onChange={e => setEditingClient({ ...editingClient, city: e.target.value })}
                       className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-[#005596]"
-                      placeholder={editingClient?.country === 'السعودية' ? 'اختر الإقليم لتظهر المدن...' : 'اكتب اسم المدينة...'}
+                      placeholder={editingClient?.country === 'السعودية' ? (lang === 'ar' ? 'اختر الإقليم لتظهر المدن...' : 'Select a region to show cities...') : (lang === 'ar' ? 'اكتب اسم المدينة...' : 'Type city name...')}
                       disabled={editingClient?.country === 'السعودية' && !editingClient?.region}
                     />
                   )}
                 </div>
 
                 <div>
-                  <label className="block mb-1.5">البريد الإلكتروني</label>
-                  <input 
-                    type="email" 
+                  <label className="block mb-1.5">{lang === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label>
+                  <input
+                    type="email"
                     value={editingClient?.email || ''}
-                    onChange={e => setEditingClient({...editingClient, email: e.target.value})}
+                    onChange={e => setEditingClient({ ...editingClient, email: e.target.value })}
                     className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-[#005596]"
                     placeholder="example@mail.com"
                     dir="ltr"
                   />
                 </div>
                 <div>
-                  <label className="block mb-1.5">السجل التجاري C.R</label>
-                  <input 
-                    type="text" 
+                  <label className="block mb-1.5">{lang === 'ar' ? 'السجل التجاري C.R' : 'Commercial Registration No.'}</label>
+                  <input
+                    type="text"
                     value={editingClient?.crNumber || ''}
-                    onChange={e => setEditingClient({...editingClient, crNumber: e.target.value})}
+                    onChange={e => setEditingClient({ ...editingClient, crNumber: e.target.value })}
                     className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-[#005596]"
                     dir="ltr"
                   />
@@ -770,23 +857,23 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
               </div>
 
               <div className="bg-slate-50 p-4 border rounded-xl space-y-4">
-                <div className="flex items-center gap-3 bg-white p-3 border rounded-lg shadow-sm w-fit cursor-pointer" onClick={() => setEditingClient({...editingClient, taxExempt: !editingClient?.taxExempt})}>
-                  <input 
-                    type="checkbox" 
+                <div className="flex items-center gap-3 bg-white p-3 border rounded-lg shadow-sm w-fit cursor-pointer" onClick={() => setEditingClient({ ...editingClient, taxExempt: !editingClient?.taxExempt })}>
+                  <input
+                    type="checkbox"
                     checked={editingClient?.taxExempt || false}
-                    onChange={() => {}}
+                    onChange={() => { }}
                     className="w-5 h-5 cursor-pointer accent-[#005596]"
                   />
-                  <label className="cursor-pointer">هذا العميل جهة معفاة من ضريبة القيمة المضافة بشكل رسمي</label>
+                  <label className="cursor-pointer">{lang === 'ar' ? 'هذا العميل جهة معفاة من ضريبة القيمة المضافة بشكل رسمي' : 'This client is officially exempt from VAT'}</label>
                 </div>
-                
+
                 {!editingClient?.taxExempt && (
                   <div className="w-1/2 min-w-[250px] animate-fade-in">
-                    <label className="block mb-1.5">الرقم الضريبي (VAT)</label>
-                    <input 
-                      type="text" 
+                    <label className="block mb-1.5">{lang === 'ar' ? 'الرقم الضريبي (VAT)' : 'VAT Number'}</label>
+                    <input
+                      type="text"
                       value={editingClient?.taxNumber || ''}
-                      onChange={e => setEditingClient({...editingClient, taxNumber: e.target.value})}
+                      onChange={e => setEditingClient({ ...editingClient, taxNumber: e.target.value })}
                       className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-[#005596]"
                       dir="ltr"
                     />
@@ -794,20 +881,20 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
                 )}
               </div>
 
-              
+
               <div>
                 <div className="flex flex-col md:flex-row gap-6 mt-4">
                   {/* Comm. Classification */}
                   <div className="flex-1">
-                    <label className="block mb-1.5 text-indigo-700 font-bold">التصنيف التجاري لنشاط العميل</label>
+                    <label className="block mb-1.5 text-indigo-700 font-bold">{lang === 'ar' ? 'التصنيف التجاري لنشاط العميل' : 'Commercial Classification of Client Activity'}</label>
                     <div className="flex flex-wrap gap-2">
                       {commercialClasses.map(cl => (
                         <button
                           key={cl}
-                          onClick={() => setEditingClient({...editingClient, classification: cl})}
+                          onClick={() => setEditingClient({ ...editingClient, classification: cl })}
                           className={`px-3 py-1.5 border rounded-lg transition text-xs ${editingClient?.classification === cl ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white hover:bg-slate-50 text-slate-600'}`}
                         >
-                          {cl}
+                          {getTranslatedCommercialClass(cl, lang)}
                         </button>
                       ))}
                     </div>
@@ -815,87 +902,87 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
 
                   {/* National Address Header (Toggle) */}
                   <div className="flex-1">
-                     <label className="block mb-1.5 text-indigo-700 font-bold">&nbsp;</label>
-                     <button
-                       onClick={() => setShowNationalAddress(!showNationalAddress)}
-                       className="w-full justify-between flex items-center gap-2 px-4 py-2 border-2 border-indigo-100 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 rounded-xl font-bold transition"
-                     >
-                       <span>📍 تفاصيل العنوان الوطني</span>
-                       {showNationalAddress ? <ChevronUp className="w-4 h-4"/> : <ChevronDown className="w-4 h-4"/>}
-                     </button>
+                    <label className="block mb-1.5 text-indigo-700 font-bold">&nbsp;</label>
+                    <button
+                      onClick={() => setShowNationalAddress(!showNationalAddress)}
+                      className="w-full justify-between flex items-center gap-2 px-4 py-2 border-2 border-indigo-100 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 rounded-xl font-bold transition"
+                    >
+                      <span>{lang === 'ar' ? '📍 تفاصيل العنوان الوطني' : '📍 National Address Details'}</span>
+                      {showNationalAddress ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
 
                 {/* National Address Fields */}
                 {showNationalAddress && (
                   <div className="mt-4 bg-indigo-50/30 p-5 rounded-2xl border border-indigo-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in relative">
-                     <span className="absolute -top-3 right-6 bg-white px-3 text-xs text-indigo-600 font-bold border border-indigo-100 rounded-lg">بيانات العنوان الوطني للتسجيل</span>
-                     <div>
-                       <label className="block mb-1 text-xs text-slate-500">رقم المبنى</label>
-                       <input 
-                         type="text" 
-                         maxLength={4}
-                         value={editingClient?.nationalAddress?.buildingNumber || ''}
-                         onChange={e => setEditingClient({...editingClient, nationalAddress: {...(editingClient.nationalAddress || {}), buildingNumber: e.target.value.replace(/\D/g,'')}})}
-                         className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white"
-                         placeholder="4 أرقام"
-                         dir="ltr"
-                       />
-                     </div>
-                     <div>
-                       <label className="block mb-1 text-xs text-slate-500">اسم الشارع</label>
-                       <input 
-                         type="text" 
-                         value={editingClient?.nationalAddress?.streetName || ''}
-                         onChange={e => setEditingClient({...editingClient, nationalAddress: {...(editingClient.nationalAddress || {}), streetName: e.target.value}})}
-                         className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white"
-                         placeholder="شارع الأمير..."
-                       />
-                     </div>
-                     <div>
-                       <label className="block mb-1 text-xs text-slate-500">اسم الحي</label>
-                       <input 
-                         type="text" 
-                         value={editingClient?.nationalAddress?.district || ''}
-                         onChange={e => setEditingClient({...editingClient, nationalAddress: {...(editingClient.nationalAddress || {}), district: e.target.value}})}
-                         className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white"
-                         placeholder="حي الورود..."
-                       />
-                     </div>
-                     <div>
-                       <label className="block mb-1 text-xs text-slate-500">المدينة (بالعنوان)</label>
-                       <input 
-                         type="text" 
-                         value={editingClient?.nationalAddress?.city || ''}
-                         onChange={e => setEditingClient({...editingClient, nationalAddress: {...(editingClient.nationalAddress || {}), city: e.target.value}})}
-                         className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white"
-                         placeholder="الرياض..."
-                       />
-                     </div>
-                     <div>
-                       <label className="block mb-1 text-xs text-slate-500">الرمز البريدي</label>
-                       <input 
-                         type="text" 
-                         maxLength={5}
-                         value={editingClient?.nationalAddress?.postalCode || ''}
-                         onChange={e => setEditingClient({...editingClient, nationalAddress: {...(editingClient.nationalAddress || {}), postalCode: e.target.value.replace(/\D/g,'')}})}
-                         className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white"
-                         placeholder="5 أرقام"
-                         dir="ltr"
-                       />
-                     </div>
-                     <div>
-                       <label className="block mb-1 text-xs text-slate-500">الرقم الإضافي / الفرعي</label>
-                       <input 
-                         type="text" 
-                         maxLength={4}
-                         value={editingClient?.nationalAddress?.additionalNumber || ''}
-                         onChange={e => setEditingClient({...editingClient, nationalAddress: {...(editingClient.nationalAddress || {}), additionalNumber: e.target.value.replace(/\D/g,'')}})}
-                         className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white"
-                         placeholder="4 أرقام"
-                         dir="ltr"
-                       />
-                     </div>
+                    <span className="absolute -top-3 right-6 bg-white px-3 text-xs text-indigo-600 font-bold border border-indigo-100 rounded-lg">{lang === 'ar' ? 'بيانات العنوان الوطني للتسجيل' : 'National Address Registration Data'}</span>
+                    <div>
+                      <label className="block mb-1 text-xs text-slate-500">{lang === 'ar' ? 'رقم المبنى' : 'Building Number'}</label>
+                      <input
+                        type="text"
+                        maxLength={4}
+                        value={editingClient?.nationalAddress?.buildingNumber || ''}
+                        onChange={e => setEditingClient({ ...editingClient, nationalAddress: { ...(editingClient.nationalAddress || {}), buildingNumber: e.target.value.replace(/\D/g, '') } })}
+                        className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white"
+                        placeholder={lang === 'ar' ? '4 أرقام' : '4 digits'}
+                        dir="ltr"
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-1 text-xs text-slate-500">{lang === 'ar' ? 'اسم الشارع' : 'Street Name'}</label>
+                      <input
+                        type="text"
+                        value={editingClient?.nationalAddress?.streetName || ''}
+                        onChange={e => setEditingClient({ ...editingClient, nationalAddress: { ...(editingClient.nationalAddress || {}), streetName: e.target.value } })}
+                        className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white"
+                        placeholder={lang === 'ar' ? 'شارع الأمير...' : 'Prince St....'}
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-1 text-xs text-slate-500">{lang === 'ar' ? 'اسم الحي' : 'District Name'}</label>
+                      <input
+                        type="text"
+                        value={editingClient?.nationalAddress?.district || ''}
+                        onChange={e => setEditingClient({ ...editingClient, nationalAddress: { ...(editingClient.nationalAddress || {}), district: e.target.value } })}
+                        className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white"
+                        placeholder={lang === 'ar' ? 'حي الورود...' : 'Al-Woroud Dist....'}
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-1 text-xs text-slate-500">{lang === 'ar' ? 'المدينة (بالعنوان)' : 'City (Address)'}</label>
+                      <input
+                        type="text"
+                        value={editingClient?.nationalAddress?.city || ''}
+                        onChange={e => setEditingClient({ ...editingClient, nationalAddress: { ...(editingClient.nationalAddress || {}), city: e.target.value } })}
+                        className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white"
+                        placeholder={lang === 'ar' ? 'الرياض...' : 'Riyadh...'}
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-1 text-xs text-slate-500">{lang === 'ar' ? 'الرمز البريدي' : 'Postal Code'}</label>
+                      <input
+                        type="text"
+                        maxLength={5}
+                        value={editingClient?.nationalAddress?.postalCode || ''}
+                        onChange={e => setEditingClient({ ...editingClient, nationalAddress: { ...(editingClient.nationalAddress || {}), postalCode: e.target.value.replace(/\D/g, '') } })}
+                        className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white"
+                        placeholder={lang === 'ar' ? '5 أرقام' : '5 digits'}
+                        dir="ltr"
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-1 text-xs text-slate-500">{lang === 'ar' ? 'الرقم الإضافي / الفرعي' : 'Additional/Sub Number'}</label>
+                      <input
+                        type="text"
+                        maxLength={4}
+                        value={editingClient?.nationalAddress?.additionalNumber || ''}
+                        onChange={e => setEditingClient({ ...editingClient, nationalAddress: { ...(editingClient.nationalAddress || {}), additionalNumber: e.target.value.replace(/\D/g, '') } })}
+                        className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white"
+                        placeholder={lang === 'ar' ? '4 أرقام' : '4 digits'}
+                        dir="ltr"
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -905,23 +992,23 @@ export default function SalesHub({ lang, user, quotations }: SalesHubProps) {
 
             <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
               <div className="flex gap-2">
-                 <button 
+                <button
                   onClick={() => handleSaveClient(true)}
                   className="px-6 py-2.5 bg-[#005596] hover:bg-sky-700 text-white rounded-xl text-sm font-black shadow-lg shadow-[#005596]/20 transition flex items-center gap-2"
                 >
-                  <Save className="w-4 h-4"/> حفظ بيانات العميل
+                  <Save className="w-4 h-4" /> {lang === 'ar' ? 'حفظ بيانات العميل' : 'Save Client Data'}
                 </button>
                 {editingClient?.mobile && (
-                   <button 
+                  <button
                     onClick={() => window.open(getWhatsAppLink(editingClient.mobile!), '_blank')}
                     className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-black transition flex items-center gap-2"
                   >
-                    <MessageCircle className="w-4 h-4"/> تواصل واتس
+                    <MessageCircle className="w-4 h-4" /> {lang === 'ar' ? 'تواصل واتس' : 'WhatsApp Chat'}
                   </button>
                 )}
               </div>
               <button onClick={handleModalClose} className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-100 transition">
-                إغلاق للحين (حفظ كمسودة)
+                {lang === 'ar' ? 'إغلاق للحين (حفظ كمسودة)' : 'Close for now (Save as Draft)'}
               </button>
             </div>
           </div>
